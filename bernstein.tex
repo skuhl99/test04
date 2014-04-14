@@ -1,0 +1,2483 @@
+%\documentclass[manuscript]{aastex}    %% AASTeX
+%\documentclass[preprint]{aastex}    %% AASTeX
+\documentclass[preprint2]{aastex}    %% AASTeX
+\usepackage{graphicx}
+\usepackage{subfig}
+
+%nat This prevents commas between authors and years with natbib
+\citestyle{aa}
+%
+\makeatletter
+\DeclareRobustCommand*\textsubscript[1]{%
+  \@textsubscript{\selectfont#1}}
+\def\@textsubscript#1{%
+  {\m@th\ensuremath{_{\mbox{\fontsize\sf@size\z@#1}}}}}
+\makeatother
+
+\newcommand\rv{$R_{\rm V}$}
+\newcommand\av{$A_{\rm V}$}
+\newcommand\tauav{$\tau_{A_{\rm V}}$}
+
+\newcommand\be{\begin{equation}}
+\newcommand\ee{\end{equation}}
+\newcommand\bea{\begin{eqnarray}}
+\newcommand\eea{\end{eqnarray}}
+\newcommand\tsb{\textsubscript}
+
+\newcommand{\Trest}{T_{\rm rest}}
+\newcommand{\fitter}{{\tt snlc\_fit}}
+\newcommand{\simu}{{\tt snlc\_sim}}
+\newcommand{\mlcs}{{\tt MLCS2k2}}
+\newcommand{\salt}{{\tt SALT2}}
+\newcommand{\saltm}{{\tt SALT2mu}}
+\newcommand{\snoop}{{\tt SNooPy}}
+
+\newcommand{\env}{environment}
+\newcommand{\snana}{{\tt SNANA}}
+\newcommand{\flash}{{\tt FLASH}}
+\newcommand{\snanadir}{{\tt \$SNANA\_DIR}}
+\newcommand{\sndataroot}{{\tt \$SNDATA\_ROOT}}
+
+\newcommand{\eff}{efficiency}
+\newcommand{\effs}{efficiencies}
+\newcommand{\simeffsub}{\epsilon_{subtr}}
+\newcommand{\simeffspec}{\epsilon_{spec}}
+\newcommand{\magdim}{{\mathcal M}_{\rm dim}}
+
+\newcommand{\spec}{spectroscopic}
+\newcommand{\specy}{spectroscopically}
+
+\newcommand{\Rsig}{R_{\sigma}}
+\newcommand{\rh}{r_{h}}
+\newcommand{\SZP}{{\cal S}_{ZP}}
+\newcommand{\NADU}{ {\cal N}_{\rm ADU}}
+\newcommand{\Npe}{ {\cal N}_{\rm pe}}
+
+\newcommand{\OM}{\Omega_M}
+\newcommand{\OL}{\Omega_{\Lambda}}
+
+\shorttitle{Dark Energy Survey Supernovae}
+\shortauthors{Bernstein et al.}
+
+\begin{document}
+
+
+\title{Supernova Simulations and Strategies \\
+For the Dark Energy Survey \\ {\small Draft: \today}}
+%version submitted to ApJ on November 5, 2011}}
+
+\author{J.~P. Bernstein\altaffilmark{1}, 
+R. Kessler\altaffilmark{2,3},
+S. Kuhlmann\altaffilmark{1},\\
+R. Biswas\altaffilmark{1},
+E. Kovacs\altaffilmark{1},
+G. Aldering\altaffilmark{4},
+I. Crane\altaffilmark{1,5},
+D.~A. Finley\altaffilmark{6}, 
+J.~A. Frieman\altaffilmark{2,3,6},\\
+T. Hufford\altaffilmark{1},
+M.~J. Jarvis\altaffilmark{7,8},
+A.~G. Kim\altaffilmark{4},  
+J. Marriner\altaffilmark{6},
+P. Mukherjee\altaffilmark{9}, 
+R.~C. Nichol\altaffilmark{10},\\
+P. Nugent\altaffilmark{4},
+D. Parkinson\altaffilmark{9},
+R.~R.~R. Reis\altaffilmark{6,11}, 
+M. Sako\altaffilmark{12}, 
+H. Spinka\altaffilmark{1},
+M. Sullivan\altaffilmark{13}}
+
+\altaffiltext{1}{Argonne National Laboratory, 9700 South Cass
+ Avenue, Lemont, IL 60439, USA}
+\altaffiltext{2}{Kavli Institute for Cosmological Physics, The
+University of Chicago, 5640 South Ellis Avenue Chicago, IL
+60637, USA}
+\altaffiltext{3}{Department of Astronomy and Astrophysics, The
+University of Chicago, 5640 South Ellis Avenue Chicago, IL
+60637, USA}
+\altaffiltext{4}{E. O. Lawrence Berkeley National Laboratory,
+1 Cyclotron Rd., Berkeley, CA 94720, USA}
+\altaffiltext{5}{Department of Physics, University of Illinois 
+at Urbana-Champaign, 1110 West Green Street, Urbana, IL 61801-3080 USA}
+\altaffiltext{6}{Center for Particle Astrophysics, Fermi
+National Accelerator Laboratory, P.O. Box 500, Batavia, IL
+60510, USA}
+\altaffiltext{7}{Centre for Astrophysics, Science \& Technology Research Institute, 
+University of Hertfordshire, Hatfield, Herts, AL10 9AB, UK}
+\altaffiltext{8}{Physics Department, University of the Western Cape, Cape Town, 7535, South Africa}
+\altaffiltext{9}{Department of Physics and Astronomy, Pevensey 2 Building
+University of Sussex, Falmer Brighton BN1 9QH, UK }
+\altaffiltext{10}{Institute of Cosmology and Gravitation,
+Mercantile House, Hampshire Terrace, University of Portsmouth
+PO1 2EG, UK}
+\altaffiltext{11}{Now at: Instituto de F\'\i sica, Universidade Federal do Rio de Janeiro
+C. P. 68528, CEP 21941-972, Rio de Janeiro, RJ, Brazil}
+\altaffiltext{12}{Department of Physics and Astronomy, University
+of Pennsylvania, 203 South 33rd Street, Philadelphia, PA 19104,
+USA}
+\altaffiltext{13}{Department of Physics, Denys Wilkinson Building, 
+Oxford University, Keble Road, Oxford, OX1 3RH, UK}
+
+\begin{abstract}
+We present an analysis of supernova light curves simulated for the upcoming Dark Energy Survey (DES) supernova search. The simulations employ a code suite that generates and fits realistic light curves in order to obtain distance modulus/redshift pairs that are passed to a cosmology fitter. We investigated several different survey strategies including field selection, supernova selection biases, and photometric redshift measurements. Using the results of this study, we chose a 30 square degree search area in the \textit{griz} filter set. We forecast 1) that this survey will provide a homogeneous sample of up to 4000 Type Ia supernovae in the redshift range 0.05$<$z$<$1.2, and 2) that the increased red efficiency of the DES camera will significantly improve high-redshift color measurements.  The redshift of each supernova with an identified host galaxy will be obtained from spectroscopic observations of the host. A supernova spectrum will be obtained for a subset of the sample, which will be utilized for control studies. In addition, we have investigated the use of combined photometric redshifts taking into account data from both the host and supernova.  We have investigated and estimated the likely contamination from core-collapse supernovae based on photometric identification, and have found that a Type Ia supernova sample purity of up to 98\% is obtainable given specific assumptions. Furthermore, we present systematic uncertainties due to sample purity, photometric calibration, dust extinction priors, filter-centroid shifts, and inter-calibration. We conclude by estimating the uncertainty on the cosmological parameters that will be measured from the DES supernova data.
+\end{abstract}
+
+\keywords{supernovae -- cosmology: simulations}
+
+\tableofcontents
+
+\section{Introduction}\label{sec:intro}
+In the late 1990's, observations of distant Type Ia supernovae (SNIa) provided
+the convincing evidence for the acceleration of cosmic expansion \citep{rie98,per99}. 
+Dedicated supernova (SN) surveys
+covering cosmologically relevant redshifts, such as the ESSENCE Supernova Survey \citep{mik07,fol09}, 
+Supernova Legacy Survey \citep[SNLS,][]{ast06,con11}, Sloan Digital
+Sky Survey-II Supernova Survey \citep[SDSS,][]{Fri08a,sak11}, 
+Carnegie Supernova Project \citep[][]{ham06,csp11}, Stockholm VIMOS Supernova Survey II \citep{mel11},
+and Hubble Space Telescope searches 
+\citep[e.g.,][]{str04,daw09,ama10}, have substantially
+improved the quantity and quality of SNIa data in the last decade.
+A previously unknown energy-density component known as dark energy
+is the most common explanation for cosmic acceleration
+\citep[for a review, see][]{fri08b,wei12}. 
+The recent SN data, in
+combination with measurements of the cosmic microwave
+background (CMB) anisotropy and baryon acoustic oscillations
+(BAO), have confirmed and constrained accelerated expansion in terms of the 
+the relative dark energy density ($\Omega_{DE}$) and equation of state 
+parameter ($w\equiv p_{DE}/\rho_{DE}$, where $p_{DE}$ and $\rho_{DE}$ are the pressure and density of dark
+energy, respectively). The next generation of cosmological surveys is
+designed to improve the measurement of $w$, and constrain its variation with time, 
+from observations of the most powerful probes of dark energy as suggested by the Dark Energy
+Task Force \citep{alb06}: SNe, BAO, weak lensing, and galaxy clusters.
+
+Future SN surveys face common issues, including
+the number and position of fields, filters, exposure times, cadence, and
+spectroscopic and photometric redshifts. Each study must
+optimize telescope allocations to return the best cosmological
+constraints. The simulation 
+analysis presented in the paper is
+for the Dark Energy Survey\footnote{http://www.darkenergysurvey.org}
+(DES), which expects to see first-light in 2012. The DES will carry out a deep
+optical and near-infrared survey of 5000 square degrees of the
+South Galactic Cap (see Fig.~\ref{fig:footprint}) using a new
+3 deg$^2$ Charge Coupled Device (CCD) camera \citep[the Dark Energy Camera, or ``DECam,''][]{decam} 
+to be mounted on
+the Blanco 4-meter telescope at the Cerro Tololo Inter-American
+Observatory (CTIO). The DES SN component will
+use approximately 10\% of the total survey time during
+photometric conditions and make maximal use of the
+non-photometric time, for a total SN survey of $\sim$1300
+hours. The DECam focal plane detectors \citep{est10} are thick CCDs from 
+Lawrence Berkeley National Laboratory (LBNL), which are characterized by much 
+improved red sensitivity relative to conventional CCDs \citep[see Fig.~\ref{fig:filters}, 
+as well as][]{hol02,gro06,die08}. This will allow for deeper 
+measurements in the redder bands, which is of particular
+importance for high-redshift SNe. This effect is shown in Fig.~\ref{fig:colorcomp}, 
+which plots simulated scatter in the \salt\ \citep{guy07} SN color 
+parameter (see $\S$\ref{sec:lcfit_nop}) for the SDSS, SNLS, and DES. Note, 
+in particular, the superior high-redshift color measurements in the DES deep 
+fields (see $\S$\ref{sec:fields}). Details of the simulation method can be found 
+in $\S$\ref{sec:sim}. The implementation for the DES, e.g., an exposure time of 
+approximately an hour in the SDSS-like \textit{z} pass-band per field per observation, 
+is discussed in $\S$\ref{sec:simopt}. 
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]
+{des_footprint_adjusted.eps}}
+\caption{The DES footprint. The white squares
+indicate the locations of our current choice of five SN fields (see
+$\S$\ref{sec:fields}). For the survey strategies considered in this 
+analysis with additional shallow fields, those fields are placed 
+next to these five fields. The size of the squares as shown is much 
+larger than the 3 deg$^2$ field of view of DECam in order to 
+make them easier to see in this Figure. The scale shows the log 
+of {\it r}-band (as defined in $\S$\ref{sec:fields}) Galactic extinction in magnitudes.}
+\label{fig:footprint}
+\end{figure}
+
+An accurate redshift determination (to $\sim$0.5\%) is necessary to place a SN on the Hubble 
+diagram. This can be obtained by taking a spectrum of the SN itself or of its host galaxy. 
+A spectrum of the SN has the added advantage of providing a definitive confirmation of the 
+SN type, and allowing for studies of systematic variations, but is more difficult to obtain. 
+Follow-up spectroscopy of the host galaxy can be done at a later date, taking advantage of 
+multi-object spectrograph capabilities to obtain many spectra at once. Photometric redshifts 
+can also be obtained using deep  co-added photometry of the host galaxy, but the redshift 
+accuracy is degraded, reducing the usefulness of the SN for cosmological measurements.
+The existing SNIa samples from previous surveys include a subset of SNe with measured spectra 
+consisting of $\sim$1000 SNIa spread out over many surveys 
+\citep[][and references therein]{sul11,ama10}, and the remainder includes many more 
+SNe with host spectra or host and/or SN photometric redshifts. The usefulness of the current
+photometric samples depends on the fraction of host galaxies that will be followed-up, 
+a number which is uncertain. The DES will identify up to $\sim$4000 high-quality SNIa, and 
+plans a follow-up program to acquire SN spectra near peak
+for up to 20\% of this sample and host galaxy spectra for the 
+majority of the remainder. For SNe that do not have a follow-up 
+or host galaxy spectrum taken, a deep co-add of 
+images ($>$70 hours per season) will be used to determine the host 
+photometric redshift. This host redshift will be further utilized as a prior
+for a combined SN photometric redshift fit. 
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=85mm]
+{trans_snls_des_comp_asahi1.eps}}
+\caption{Comparison of the SNLS \citep{reg09} and DECam total transmission (H. Lin, private communication, 2011) 
+for an airmass of 1.3.
+Also shown is the CCD quantum efficiency (QE). 
+The total transmission includes the effects of QE, the atmosphere, and the 
+optical systems of the relevant cameras. Note the increased DES sensitivity at redder wavelengths. 
+The DECam transmission is based on measurements of the full-size filters,  which was not
+available during the simulations performed for this analysis.  The assumed transmission 
+in this paper is about 10\% smaller than the measured values. 
+}
+\label{fig:filters}
+\end{figure}
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=85mm]
+{Ia_cerror_Dc_compare.eps}}
+\caption{Simulation of the scatter in the \salt\ color parameter for the SDSS, SNLS, and 
+DES supernova samples highlighting the red advantage of the DES. The simulation 
+method and DES implementation are discussed in $\S$\ref{sec:sim} and $\S$\ref{sec:simopt}, respectively.}
+\label{fig:colorcomp}
+\end{figure}
+
+In order to aid in the design of the %optimal 
+DES SN search, we
+simulate expected DES SN observations. We use the parametric \snana\ code suite \citep{snana} that 
+generates SN light curves using realistic models and takes into account, e.g., seeing 
+conditions, Galactic extinction, and CCD noise. In this work, we use the 
+optical ($\lambda$ $<$ 1 $\mu$m) \mlcs\ \citep{jha07} 
+and \salt\ \citep{guy07} models and the optical+infrared \snoop\ model \citep{bur11}.
+We chose to employ the \mlcs\ model because the inclusion of the straightforward reddening parametrization
+from \cite{car89} makes it easier to assess systematic errors simply by varying the 
+parameters. In contrast, the parametrization in \salt\ is more complex which complicates 
+the systematics studies.
+We further employ a light curve fitter, based on \mlcs\ and 
+\salt\ models, to obtain a prediction of the measured distance modulus, $\mu$, for each SN. 
+Measured redshifts are expected to come from a combination of spectra and 
+photometric redshifts from the host galaxy and SN, and results are compared for
+these different scenarios.
+
+The outline of the paper is as follows. We present our method
+of SN light curve simulation in $\S$\ref{sec:sim}.  We
+discuss the DES options and present example simulations in
+$\S$\ref{sec:simopt}.  
+Redshift determinations, both spectroscopic and photometric, are discussed in $\S$\ref{sec:redshift}.
+Analysis options are presented in $\S$\ref{sec:specz_anal}.
+A study of Type Ia sample purity is presented in 
+$\S$\ref{sec:misid}. SN colors and dust extinction 
+are discussed in $\S$\ref{sec:dust}, and projected cosmology
+constraints are presented in $\S$\ref{sec:cosmo}. Finally, 
+we summarize and discuss our results in $\S$\ref{sec:discuss}.
+
+\section{Supernova light curve simulation}\label{sec:sim}
+In this section, we present our SN light curve
+simulations in greater technical detail. We discuss general
+properties of \snana\ in $\S$\ref{sec:snana} and introduce our
+application to the DES in $\S$\ref{sec:siminputs}.
+
+\subsection{\snana}\label{sec:snana}
+We employ the \snana\ package \citep{snana} to simulate 
+and fit Type Ia and Type
+Ibc/II SN light curves. We emphasize that while we are
+using \snana\ to investigate the capabilities of the DES, it was
+originally developed for and utilized for the analysis of observational SDSS
+SN data \citep{kes09}, was used by the Large Synoptic
+Survey Telescope (LSST) collaboration to forecast SN
+observations \citep{lsst}, and can be applied to any survey in general.
+Using the simulation requires a survey-specific
+library that includes the survey characteristics, e.g.,
+filters, observing cadence, seeing conditions, zeropoints, and CCD
+characteristics. 
+
+For a rest-frame SN light curve model, such as \mlcs, the basic simulation steps are as follows:
+
+\begin{enumerate}
+  \item pick a sky position, redshift from observed SN rate distributions, and sequence 
+of observer and rest-frame observation times;
+  \item	pick SN luminosity ($\Delta$) and \textit{V}-band host-extinction \citep[\av, the amount of 
+dust extinction in magnitudes from][]{car89} parameters randomly drawn from their distributions;
+  \item	generate a rest-frame light curve from the SN light curve model: e.g., 
+magnitudes in the \textit{U}, \textit{B}, 
+\textit{V}, \textit{R}, \& \textit{I} filters \citep{bes90} versus time;
+  \item	add host-galaxy extinction to each rest-frame magnitude using \av\ (from Step 2 above) and the CCM dust model from \cite{car89};
+  \item	add K-corrections \citep[][]{nug02} to transform \textit{UBVRI} to observer-frame 
+filters\footnote{K-corrections are needed in both the simulator and fitter, and are applied using a technique 
+very similar to that in \cite{jha07}.};
+  \item	add Galactic (Milky Way) extinction using data from \cite{sch98};
+  \item	use survey zeropoints to translate above-atmosphere magnitudes into observed 
+flux in CCD counts;
+  \item	compute noise from the sky level, point spread function (PSF), CCD readout noise (negligible for the DES), and signal Poisson statistics;
+  \item In addition to steps 4 and 5 above, apply an ad-hoc Gaussian smearing model of intrinsic SN color variations to 
+obtain Hubble residuals that match observations.
+\end{enumerate}
+
+We make use of three light-curve models that are integrated into \snana\ to simulate and fit SN 
+light curves: \mlcs, \salt, and \snoop. Note that \snana\ uses MINUIT \citep{jam94} for minimization. 
+The \mlcs\ model is improved relative to the \cite{jha07} 
+code \citep[see $\S$5.1 and Appendix B of][]{kes09}, e.g., it fits in flux instead of 
+magnitudes and includes simulated efficiency in the prior. A key difference between \mlcs\ 
+and \salt\ is that the former fits for a distance for each SN while the latter does not. 
+The {\salt} light curve model in {\snana} is accompanied by a separate program 
+called {\saltm} \citep{mar11} that is used to determine a distance for each SN so 
+that the \mlcs\ and \salt\ fit results can be treated in the same way 
+(see $\S$\ref{sec:lcfit_nop} for additional information).
+
+\subsection{Simulation inputs}\label{sec:siminputs}
+Construction of a survey-specific library as input to the 
+SN simulation is crucial to obtaining realistic simulated light curves. For each DES SN observing field, this library 
+includes information about the survey cadence, filters, CCD gain and noise, PSF, sky background level, and zeropoints and their fluctuations. The zeropoint encodes exposure time, atmospheric 
+transmission, and telescope efficiency and aperture. These quantities vary with each exposure and so, 
+for the DES study, we created a program which uses, among other things, the CTIO weather histories, 
+ESSENCE zeropoint and PSF data, time gaps due to Blanco community use, and Moon brightness 
+to estimate the parameters for the DES simulation library. Table~\ref{tab:simlib} shows 
+example entries in this library, and we now discuss the details of their creation.
+
+\begin{table}[!ht]
+\begin{center}
+\small
+\begin{tabular}{cccc}
+\hline
+MJD/Filter & PSF (pixels) & $\sigma_{{\rm sky}}$ ($e^{-}$) & Zpt (mag)\\\hline
+55881.191/\textit{g} & 2.26 & 80 & 33.0\\
+55881.199/\textit{r} & 2.16 & 151 & 34.5\\
+55881.215/\textit{i} & 2.05 & 257 & 34.7\\
+55881.238/\textit{z} & 1.79 & 651 & 35.6\\
+55884.312/\textit{g} & 2.58 & 143 & 32.7\\
+55884.328/\textit{r} & 2.62 & 220 & 34.3\\
+55884.344/\textit{i} & 2.35 & 390 & 34.4\\
+55885.188/\textit{z} & 2.83 & 764 & 35.7\\
+\hline
+\end{tabular}
+\caption{Example DES SN simulation inputs for a 4-day excerpt from a single, 6-month season where ``$\sigma_{{\rm sky}}$'' is the 
+sky noise in photoelectrons and ``Zpt'' is the zeropoint in magnitudes. Additional 
+inputs that are needed, but not shown in this Table, are the RA \& DEC of the field, 
+CCD gain and noise, pixel size, and the contribution to the zeropoint 
+due to fluctuations.\label{tab:simlib}}
+\end{center}
+\end{table}
+\normalsize
+
+The SN component of the DES is limited to about 10\% of the total survey photometric time. 
+In all cases, after a certain period of time (expected to be $\sim$8 days), if a SN field 
+has not been observed it becomes the top observational priority of the survey even 
+under photometric conditions.  There are two main options being considered for the 
+decision procedure to observe in shorter intervals than 8 days: 1) make maximal 
+use of non-photometric time based on an infrared cloud camera \citep[RASICAM,][]{rasicam}, or 2) decide 
+based on the measured seeing,  giving the non-SN DES components the best seeing for 
+weak lensing and other science,  and switch to the SN fields if the PSF is 
+$\gtrsim 1''$.  The final DES decision tree will probably be a combination 
+of these two.  In this analysis we have simulated option $\#1$.
+
+The separation of non-photometric and 
+photometric time in the generation of the simulation library is accomplished by 
+incorporating weather history maintained at CTIO for more than twenty years. This SN survey 
+strategy leads to a two-component cadence: a peak in the number of observations 
+at very short cadence due to several-day periods of non-photometric time when the
+SN fields dominate the observing time, and a broad secondary maximum around 8 days 
+when photometric time is used (see Fig.~\ref{fig:cadence}). 
+Our SN observing also requires an airmass less than 2.0.  This, combined with 
+DES half-nights in January and February and long periods of photometric conditions, 
+can lead to cadences longer than 8 days.
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{annis_gaps_v4f_3deep_3.eps}}
+\caption{The DES 5-field hybrid strategy 
+(see Tab.~\ref{tab:strat})
+forecast for the distribution of the temporal gaps between observations 
+during a typical DES SN season for the two deep fields only. The histogram entries are for all of the DES SN filters combined,
+e.g., a gap of 6 days in observations in any one of the filters increments the 
+count of 6-day gaps. The gaps in the 10-field hybrid strategy are very similar.}
+\label{fig:cadence}
+\end{figure}
+
+The other critical components of the simulation input library are the PSF, sky 
+background, and zeropoints.  Usually, in this type of study, one takes averages 
+of these quantities. In our case, we have used ESSENCE data to provide variations of the 
+PSF and 
+zeropoints at CTIO for each observation, as well as SDSS data for the dependence of sky 
+background on relative Moon position. The measured PSF variation of ESSENCE is input 
+directly into the simulation library after correcting for 
+the wavelengths of the filter centroids and airmasses for the mock DES observation.  
+The resulting PSF distribution is shown in Fig.~\ref{fig:psf}.  
+Recent improvements to the telescope and its environment, along with the optical 
+design and mechanical (hexapod) control of DECam, are expected to 
+deliver improved image quality compared to these data. The choice of PSF distribution is 
+conservative for option  $\#1$ and consistent with option $\#2$. 
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{seeing.eps}}
+\caption{The DES 5-field hybrid strategy (see Tab.~\ref{tab:strat})
+forecast for the number of observations versus the input PSF for a 
+typical DES SN season. The histogram entries are for all of the DES SN filters combined,
+e.g., an observation with a PSF value of 1.0 in any one of the filters 
+increments the count of 1.0 PSF observations. The PSF distribution is 
+very similar for the other survey strategies.}
+\label{fig:psf}
+\end{figure}
+
+\begin{figure}[t]
+\centerline{\includegraphics[angle=0,width=75mm]{filter_cuts_Ia_1.eps}}
+\caption{
+Type Ia supernova redshift distributions for the DES 5-field hybrid strategy (see Tab.~\ref{tab:strat}) 
+for the various SNRMAX cuts indicated in the legend. The total number of 
+simulated SNe passing each set of cuts, from top to bottom, is 5571, 4783, 3906, and 3047.
+}
+\label{fig:cutsIa}
+\end{figure}
+
+Another key input to the simulation is the rate of SNIa explosions in the Universe as a 
+function of redshift (see $\S$\ref{sec:ccrate} for a discussion of the input rate of core-collapse SNe). The total number of SNe that the DES will observe is clearly directly 
+sensitive to that rate. The default SNIa rate we employ in \snana\ is the power law 
+from \cite{dil08}:
+\be
+\rm{R_{SNIa}\;\equiv\;SNIa\;rate} = \alpha_{Ia}\times(1+z)^{\beta_{Ia}}
+\label{eqn:rate}
+\ee
+where $\alpha_{Ia} = (2.6 + 0.6 - 0.5)\times 10^{-5}$ SNe $h_{70}^{3}$ 
+Mpc$^{-3}$ yr$^{-1}$, $h_{70}$ = $H_{\rm 0}$/(70 km s$^{-1}$ Mpc$^{-1}$), where $H_{\rm 0}$ 
+is the present value of the Hubble parameter\footnote{We use 
+$H_{\rm 0}$ = 65 km s$^{-1}$ Mpc$^{-1}$ in our \mlcs\ simulations to match 
+the training value, and 70 km s$^{-1}$ Mpc$^{-1}$ in our \salt\ simulations.
+These values of the Hubble parameter are also used to determine the simulated
+distance modulus in a flat $\Lambda CDM$ model with $\Lambda =0.73$. We 
+do not attempt to model rate differences due to host-galaxy type.}, and $\beta_{Ia} = 1.5 \pm 0.6$. 
+In addition, \cite{dil08} further found the correlation coefficient between $\alpha_{Ia}$ 
+and $\beta_{Ia}$ to be $-$0.80. Extrapolating this rate to redshifts greater than 1 
+is highly uncertain. 
+
+\section{Survey strategy options and example simulations}\label{sec:simopt}
+Simulation of the current DES observing strategy leads to a total exposure time for the SN search of 
+$\sim$1300 hrs, over 900 hrs of which occur during non-photometric conditions. 
+On a given night, prioritization of observations in each of the \textit{griz} filters 
+will be made based on descending time since the previous observation. There is an automatic 
+8-day trigger if no photometric observation has been performed for a given 
+filter. 
+%Here we pursue optimization of the DES SN search strategy within these constraints. 
+For the simulations presented in this section, we employed the \mlcs\ model as the basis for generating and fitting SN light curves over the redshift range of 
+0.0$<$z$<$1.2. The free parameters of the model are the 
+time of maximum light in the \textit{B}-band ($t_{\rm o}$), the distance modulus ($\mu$), 
+the luminosity parameter ($\Delta$), and the extinction in 
+magnitudes by dust in the host galaxy \citep[parametrized by A$_{\rm V}$ 
+and R$_{\rm V}$ from][]{car89}. In this section, $A_{\rm V}$ and $\Delta$ were constrained 
+to a range of 0.0 to 2.0 and $-$0.4 to 1.80, respectively, and R$_{\rm V}$ was fixed 
+to 2.18 \citep{kes09}.  Parameter variations and comparisons with simulations using
+the \salt\ model will be presented in later sections.
+
+\begin{figure}[t]
+\centerline{\includegraphics[angle=0,width=75mm]{filter_cuts_CC_1.eps}}
+\caption{
+Core-collapse supernova redshift distributions for the DES 5-field hybrid strategy 
+(see Tab.~\ref{tab:strat}) 
+for the various SNRMAX cuts indicated in the legend. The total number of 
+simulated SNe passing each set of cuts, from top to bottom, is 3458, 2462, 1785, and 1112.}
+\label{fig:cutsCC}
+\end{figure}
+
+\subsection{Fields, filters, and selection cuts}\label{sec:fields}
+The choice of the DES SN fields is driven by four primary considerations:
+\begin{itemize}
+ \item visibility from CTIO,
+ \item visibility from Northern-hemisphere, 8-meter-class telescopes for SN follow-up spectroscopy,
+ \item past observation history as it pertains to the use of pre-existing galaxy catalogs and calibration,
+ \item overlap with the survey area for the Visible \& Infrared Survey Telescope 
+for Astronomy \citep[VISTA,][see $\S$\ref{sec:video}]{eme04}.
+\end{itemize}
+
+Based on these criteria, we have tentatively chosen the five fields in Tab.~\ref{tab:fields}
+and Fig.~\ref{fig:footprint}. In this paper, we consider five SN survey strategies (see Tab.~\ref{tab:strat}).
+For the 10-field hybrid strategy, the fields are the two deep fields and 3 
+shallow fields from the 5-field hybrid plus 5 additional shallow fields clustered around the \textit{Chandra} 
+Deep Field South field. In later sections we will compare in detail the results of these surveys, including 
+projected constraints on cosmology. 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{cccc}
+\hline
+Field & Pointing RA\&Dec\\
+(3 deg$^2$ area)      &  (deg., J2000)\\\hline
+\textit{Chandra} Deep Field S. & 52.5$^{\circ}$, $-$27.5$^{\circ}$\\
+XMM-LSS & 34.5$^{\circ}$, $-$5.5$^{\circ}$\\
+SDSS Stripe 82 & 55.0$^{\circ}$, 0.0$^{\circ}$\\
+SNLS D1/Virmos VLT & 36.75$^{\circ}$, $-$4.5$^{\circ}$\\
+ELAIS S1 & 0.5$^{\circ}$, $-$43.0$^{\circ}$\\
+\hline
+\end{tabular}
+\caption{Likely Dark Energy Survey supernova fields. Note that not all of these fields satisfy all
+of the field choice optimization criteria discussed in the text; e.g., ELAIS S1 is not visible from 
+Northern-hemisphere, 8-meter-class telescopes, but matches the other criteria well.}\label{tab:fields}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{cccccc}
+\hline
+Survey & \# deep & \# shallow & Area\\
+strategy & fields & fields & (deg$^2$)\\\hline
+ultra-deep & 1 & 0 & 3\\
+deep & 3 & 0 & 9\\
+shallow & 0 & 9 & 27\\
+5-field hybrid & 2 & 3 & 15\\
+10-field hybrid & 2 & 8 & 30\\
+\hline
+\end{tabular}
+\caption{Dark Energy Survey supernova strategies considered in this paper where each
+SN field has an area equal to the DECam 3 deg$^2$ field of view. Note that the difference between 
+deep and shallow fields is exposure time, not area. 
+}\label{tab:strat}
+\end{center}
+\end{table}
+
+We used \snana\ to %optimize 
+explore the choice of filters and exposure times, 
+and the resulting effects on survey cadence.
+We evaluated the effect of the \textit{griz} and \textit{grizY} filter sets on DES SN observations. 
+Figure~\ref{fig:filters} shows the chosen DES SN filters along with the DES CCD quantum 
+efficiency. In this paper, we have selected five SN search strategies that span the range from 
+ultra-deep and narrow to wide and shallow, including hybrid mixtures of the two. 
+Table~\ref{tab:times} shows the filter exposure times for 
+the deep fields for the deep and 10-field hybrid strategies and the shallow fields for 
+the 10-field hybrid strategy for the \textit{griz} filter set (see the discussion about \textit{Y}-band at 
+the end of this section). Table~\ref{tab:limmag} shows the limiting magnitudes in each 
+filter for the 10-field hybrid survey.
+For all the survey strategies considered, the deep fields have the exposure times listed in the 
+second column of Tab.~\ref{tab:times}. For the shallow survey considered in this paper, as well
+as for the shallow fields in the 5-field hybrid strategy, 
+each of the fields has one third of the total exposure time per field of a deep field. 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{ccccc}
+\hline
+Filter & Deep exp. & Lim. & Shallow exp. & Lim.\\
+       & time (s) & mag.  & time (s) &mag.\\\hline
+\textit{g} & 300  &25.2& 175 &24.9\\
+\textit{r} & 1200 &25.4& 50 &23.7\\
+\textit{i} & 1800 &25.1& 200 &23.9\\
+\textit{z} & 4000 &24.9& 500 &23.8\\
+\hline
+\end{tabular}
+\caption{Filter exposure times and limiting magnitudes for the 10-field hybrid strategy. 
+The deep and shallow times were
+chosen to roughly equalize signal-to-noise at high redshift and near a 
+redshift of z=0.5, respectively (see Fig.~\ref{fig:des_snr_10fields}).
+Limiting magnitudes are for point sources detected at $5\sigma$
+using a single filter observation.\label{tab:times}}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{ccccc}
+\hline
+Filter & Deep & Shallow\\
+       & Fields  & Fields\\\hline
+\textit{g} & 27.1 & 26.8\\
+\textit{r} & 27.3 & 25.6\\
+\textit{i} & 27.0 & 25.9\\
+\textit{z} & 26.8 & 25.7\\
+\hline
+\end{tabular}
+\caption{Limiting magnitudes for point sources detected at $5\sigma$ in the DES 
+10-field hybrid survey, using a 1-season co-add and assuming 35 filter 
+observations per season. The limiting magnitudes 
+for a 5-season co-add are $\sim 0.85$ magnitudes deeper.\label{tab:limmag}}
+\end{center}
+\end{table}
+
+We define ``epoch'' to be an observation in a single filter on a given date (with no 
+requirement on a source detection). In order to produce simulated sets 
+of DES SN light curves that realistically represent the quality needed for the
+determination of cosmological parameters, we defined selection cuts that each simulated light
+curve must individually satisfy (see Tab.~\ref{tab:cuts}). 
+The selection criteria ensure that a DES SN light curve used for analysis is well-sampled, 
+with measurements both when the light curve is rising and falling, and of 
+sufficient quality to allow for a robust distance determination, which is 
+essential for constraining cosmology. However, these cuts are relatively inefficient 
+for SNIa retention at higher DES redshifts; studies of the use of looser cuts in conjunction 
+with photometric SN typing methods are ongoing. The effects of different 
+cuts on the maximum signal-to-noise in a given pass-band (SNRMAX) on simulated Type Ia and 
+simulated core collapse samples (described in more detail later) 
+are shown in Fig.~\ref{fig:cutsIa} and Fig.~\ref{fig:cutsCC} 
+respectively.  The tightest cuts shown, which are our 
+defaults in this paper, produce the best sample purity at the 
+expense of lower SNIa efficiency. 
+\begin{table}[h]
+\centering
+\begin{tabular}
+[l]{l}\hline
+Selection cuts for DES SNe\\
+\hline
+1. At least 5 total epochs above a signal-to-noise\\\hspace{5mm} threshold of 0.01;\\
+2. At least one epoch before and at least one\\\hspace{5mm} 10 rest-frame days after the \textit{B}-band peak;\\
+3. At least one filter measurement with a\\\hspace{5mm} SNRMAX above 10;\\
+4. At least two additional filter measurements\\\hspace{5mm} with a SNRMAX above 5.\\
+\hline
+\end{tabular}
+\caption{Selection cuts that each simulated light curve must individually satisfy 
+in order to ensure realistic simulations of the DES SN capabilities. Note that epochs that
+are included in the light curve fit are between a rest-frame phase of $-$15 and $+$80 days.}
+\label{tab:cuts}
+\end{table}
+
+Fig.~\ref{fig:des_snr_10fields} shows example multi-band SNRMAX values
+for simulated DES SN light curves subject to the 
+cuts described above assuming the 10-field hybrid strategy. 
+Note how the \textit{g}-band measurements have 
+significantly reduced SNRMAX beyond a redshift of z$\sim$0.5 and are absent beyond z$\sim$0.8 
+due to the flux being redshifted out of the wavelength range of the light curve model.
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{des_snr_10fields_comp.eps}}
+\caption{Average maximum signal-to-noise for SNIa in a given pass-band (SNRMAX) for the 10-field hybrid strategy as a function of redshift in the DES \emph{g}-, \emph{r}-,  
+\emph{i}-, and \emph{z}-bands. Note that at higher redshifts, the points are effected by the selection criteria. The upper and lower panels show the result for the deep and shallow fields, respectively.}
+\label{fig:des_snr_10fields}
+\end{figure}
+
+Our investigation of a \textit{grizY} 
+survey option showed that the \textit{Y}-band SNRMAX barely reaches above 5 
+even when half of the deep \textit{z}-band exposure time is devoted to it, 
+and that the \textit{Y}-band drops below SNRMAX of 5 at a redshift of $\sim0.7$. 
+Thus, we elected not to use the \textit{Y} filter for DES SN observations. Note, 
+however, that the planned DES overlap with the VIDEO Survey will provide for 
+\textit{Y}-band and \textit{J}-band light curves for a few percent of the DES SNe (see $\S$\ref{sec:video}).
+
+
+\subsection{Light curves and SN statistics}\label{sec:lc}
+
+Fig.~\ref{fig:lc} shows example DES light curves at redshifts of 0.25, 0.50, 
+0.74, and 1.07. Particularly noteworthy is that the flux errors projected for 
+DES SN observations are very small at lower redshifts and remain reasonable 
+even beyond a redshift of z=1. The fact that the \textit{g}-band is absent for 
+the z=0.74 and z=1.07 light curves highlights why high-redshift SNe only 
+have 3 pass-bands for \textit{griz} surveys. 
+
+A key to %optimizing 
+planning a cosmological SN search is the trade-off between survey area and depth. 
+For the DES SN search, a motivation for deep observations is the advantage 
+of the DECam red sensitivity, while a wide survey area is desirable because it returns 
+a greater number of SNIa at a given signal-to-noise. In other words, %an optimal
+the
+observing strategy should be both wide, to maximize SN statistics, and deep, to
+provide for a longer lever arm. Fig.~\ref{fig:nsn_4surveys} shows the SNIa redshift distribution 
+for the deep, shallow, and two hybrid survey strategies. We also considered an ultra-deep 
+strategy (3 deg$^2$). We found that the ultra-deep strategy delivers only a marginal 
+improvement in SNIa statistics beyond a redshift of z=1 relative to the 10-field hybrid strategy, 
+for example, while the latter results in a factor of 2.8 more SNIa overall. 
+In particular, we found that the 10-field hybrid has 42\% more SNIa in the redshift range of 
+0.6-1.0 relative to the ultra-deep strategy. Thus, we do not consider the ultra-deep strategy further. 
+Figure~\ref{fig:nsn_4surveys} also shows that the deep and shallow 
+surveys exhibit a significant decrease in the number of SNe at low- and 
+high-redshifts, respectively, relative to the two hybrid surveys. The hybrid surveys
+also retain a significant fraction of the low- and high-redshift SNe found in the 
+shallow and deep surveys while avoiding a significant fraction of the selection 
+bias of the shallow survey (see $\S$\ref{sec:lcfit_p}). The redshift distributions for the hybrid 
+surveys including the deep and shallow components are shown in Fig.~\ref{fig:nsn_comp}. The 
+10-field hybrid strategy is preferred on the grounds of maximizing SN statistics in 
+the intermediate redshift regime.
+
+In order to explore the sensitivity of the redshift distribution to the rate of 
+SNIa, we performed simulations including the $\alpha_{Ia}$ and $\beta_{Ia}$ variations 
+according to the uncertainties given by Eqn.~\ref{eqn:rate}.  Since \cite{dil08} 
+found the correlation coefficient between $\alpha_{Ia}$ and $\beta_{Ia}$ to be $-$0.80, 
+we ran simulations assuming the parameters are 100\% anti-correlated.  We found that 
+the projected number of DES SNIa would change by approximately 
+7\% given such a rate variation.
+
+\onecolumn
+\begin{figure}[ht]
+\includegraphics[scale=0.800,angle=0]{deslc_40337_z0_25.eps}
+\includegraphics[scale=0.800,angle=0]{deslc_40452_z0_50.eps}
+\includegraphics[scale=0.800,angle=0]{deslc_40009_z0_74.eps}
+\includegraphics[scale=0.800,angle=0]{deslc_40087_z1_07.eps}
+\caption{From \textit{top} to \textit{bottom}: simulated DES light curves for the deep component of the 5-field hybrid strategy at redshifts of z=0.25, 0.50, 0.74, and 1.07, respectively. The points are \mlcs\ simulated data, the center of the band is the \mlcs\ fit, and the width of the band gives the fit error. Note the flux accuracy and progressive reduction in \textit{g}-band flux until it drops out entirely due being redshifted out of the wavelength range of the light curve model.}
+\label{fig:lc}
+\end{figure}
+\twocolumn
+
+\onecolumn
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=150mm]{nsn_4surveys.eps}}
+\caption{Number of SNIa versus redshift for four of the DES strategies 
+investigated. Total supernova statistics are 4175, 3482, 2984, 2381 for
+the shallow 9-field, hybrid 10-field, hybrid 5-field, and 
+deep 3-field surveys respectively. The SN statistics shown include the
+application of all the selection cuts listed in Tab.~\ref{tab:cuts}.
+Note that subtle changes in the amount of exposure time allocated to each pass 
+band can lead to large changes in the number of SNIa passing cuts.
+For example, a reasonable set of alternate exposure times considered 
+for the 10-field hybrid results in $\sim$600 more SNIa passing cuts, 
+mostly in the redshift range of 0.6-0.8. Such additional SNIa negate 
+the apparent advantage of the 5-field hybrid survey in that redshift range 
+as shown in this plot.}
+\label{fig:nsn_4surveys}
+\end{figure}
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=100mm]{nsn_comp.eps}}
+\centerline{\includegraphics[angle=0,width=100mm]{nsn_10fields_comp.eps}}
+\caption{\textit{Top (bottom)}: the SNIa redshift distribution for the 5-field (10-field) hybrid 
+survey including the deep and shallow components. Note that the 10-field cadence is slightly 
+worse.}
+\label{fig:nsn_comp}
+\end{figure}
+\twocolumn
+
+\section{Redshift Determination}\label{sec:redshift}
+A precise estimate of SN redshifts is needed for placement of SNe on the Hubble 
+diagram and for performing K-corrections on observed pass-bands to the SN rest frame.
+There are four possible methods of obtaining SN 
+redshifts: 1) spectroscopic follow-up of individual SNe, 2) spectroscopic 
+redshifts of the associated host galaxies, 3) photometric redshifts (phto-z's) of SNe, and 
+4) photo-z's of the host galaxies. In addition, the DES collaboration
+is considering the use of optical cross-correlation filters \citep{sco09} 
+for both redshift determinations and SN typing. The final analysis of the
+DES SNe will use the host spectroscopic redshifts as the central method for
+redshift determination, with important roles being played by the other methods.
+We next discuss the redshift determinations for the final analysis (with 
+the complete sample of host galaxy spectra and redshifts), as well
+as the interim analysis before host spectroscopic redshifts have been measured.
+
+\subsection{Role of Each Method of Redshift Determination}
+In previous SNIa Hubble diagram analyses, cosmological constraints have been obtained using 
+mostly spectroscopic confirmation of the SN, 
+which not only afforded an extremely precise determination of the redshift, but 
+also the additional advantage of accurate SN typing. 
+For the DES, it is impractical to obtain spectra for every SN at high-z.
+The DES will use photometric typing for most of the SNe observed (see $\S$\ref{sec:misid}).
+This technique works very well, and will be further validated by obtaining a spectrum for
+a significant fraction of low-redshift SNe. In addition, a sample of $10-20\%$ of SNe
+at higher redshifts, with a spectrum taken with 6-10m class telescopes, will be used to 
+study SN evolution, photo-z's, and sample purity. Note that SNe with host galaxies 
+too dim to obtain a host spectrum are another sample that could trigger taking of
+a follow-up SN spectrum.
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|c|}\hline
+Redshift & SNLS Data & Model\\
+\hline
+0.1-0.2 &100\% & 98\% \\
+0.2-0.3 &94.4\% & 97\% \\
+0.3-0.4 &97.4\% & 94\% \\
+0.4-0.5 &96.5\% & 92\% \\
+0.5-0.6 &94.1\% & 89\% \\
+0.6-0.7 &79.0\% & 85\% \\
+0.7-0.8 &88.6\% & 82\% \\
+0.8-0.9 &78.4\% & 78\% \\
+0.9-1.0 &76.9\% & 74\% \\
+1.0-1.1 &50.0\% & 70\% \\
+1.1-1.2 &N/A & 67\% \\
+\hline
+\end{tabular}
+\caption{Measured (SNLS, Hardin et al., in preparation) and estimated 
+percentages of SNIa host galaxies with $m_i<24$ are
+tabulated. The model values are taken from the 
+middle column of Tab.~\ref{tab:galfraction-evol}
+from Appendix~\ref{apdx:hosts}. For both the data and 
+model,  the uncertainties grow from a few \% at low 
+redshift to $\pm25\%$ for z$>$1.0.
+}
+\label{tab:galfrac}%
+\end{table}
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{photoz_scatter_plot.eps}}
+\caption{Assuming the DES 5-field hybrid strategy, \textit{top}: 
+the estimated host galaxy photo-z is plotted versus the 
+true redshift, with colors representing the number of SNe per 
+bin; \textit{bottom}: the SN photo-z (with the host galaxy photo-z used as 
+a prior in the fit) is plotted versus the true redshift.
+}
+\label{fig:photoz_scatterplot}
+\end{figure}
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{photoz_host_hostz_snphotoz_v1.eps}}
+\caption{Assuming the DES 5-field hybrid strategy, \textit{top}: histogram of host galaxy 
+photo-z minus the true redshift overlaid by a Gaussian ($\sigma = 0.027$) fit to the data, 
+which was measured to have an RMS=0.037;
+%overlaid by a Gaussian fit to the data with RMS=0.037 and $\sigma=0.027$; 
+\textit{bottom}: histogram of SN photo-z (with the host galaxy 
+photo-z used as a prior in the fit) minus the true redshift 
+overlaid by a Gaussian ($\sigma = 0.022$) fit to the data, 
+which was measured to have an RMS=0.026.
+%overlaid by a Gaussian fit to the data with RMS=0.026 and $\sigma=0.022$
+}
+\label{fig:photoz_hists}
+\end{figure}
+
+Obtaining spectroscopic redshifts of host galaxies, assuming correct host identification, yields 
+precise SN redshifts. In addition, large numbers of the host galaxies can be measured simultaneously
+with a multi-object spectrograph (MOS). We will target every visible SN host, but we expect 
+that the efficiency of obtaining a valid redshift will decrease significantly for galaxies 
+dimmer than apparent i-band magnitude $m_i=24$, as indicated by the followup of SNLS galaxies 
+(Hardin et al., in preparation). For the purposes of our study, we have approximated the 
+efficiency of obtaining a galaxy redshift as 100\% for $m_i<24$ and 0\% for $m_i>24$. 
+For forecasting SNe analyses, as well as
+planning follow-up telescope resources, it is important to estimate the
+fraction of SN hosts with $m_i<24$. Measurements of SNIa host magnitudes from SNLS 
+(Hardin et al., in preparation) have large statistical uncertainties 
+at the highest SNLS redshifts. Therefore, we 
+have constructed a model described in Appendix~\ref{apdx:hosts}.  
+This is a non-trivial task, however, given
+uncertainties in the SNIa rate dependencies on galaxy mass, luminosity, and type and of
+redshift evolution.  Appendix~\ref{apdx:hosts} describes, in detail, our
+estimates of SNIa host galaxy brightnesses in redshift bins, and the 
+sources of significant uncertainty at large redshift. A model estimate 
+is shown in Tab.~\ref{tab:galfrac}, where we present the fractions of SNIa host galaxies satisfying the 
+apparent magnitude limit $m_i<24$ for z-bin values from 0.1 to 1.2.  
+Within the uncertainties, the data and model agree. In this study, we choose
+to  use the model (since it lacks the statistical fluctuations of the data) 
+to remove from our cosmology analysis SNe without a host spectrum by applying the stated 
+fractions (for the 10-field hybrid strategy, this cuts out 429 SNe, mostly at high redshift).  We will
+present the impact of this choice on cosmological constraints in $\S$\ref{sec:cosmo}. 
+
+Photo-z's, both of the host galaxy and the SN, will play four
+roles in the DES: they will provide 1) interim SN redshifts before host galaxy 
+spectra are available, 2) an opportunity to supplement the SN sample with 
+redshifts if the host galaxy is dimmer than $m_i=24$ or if the host spectrum 
+cannot be obtained for other reasons, 3) a check on host galaxy identification 
+when redshift comparisons are possible, and 4) help in classifying SNe 
+during the search and in prioritizing them for spectroscopic follow-up. 
+Two key elements of our photometric redshifts are: 1) a deep, $\sim$35 measurement 
+co-add, per season, of the host galaxy, and 2) a combined SN+host photo-z
+fit using the host photo-z as a prior. In the next two 
+sections, we show that the combination of these two elements give 
+photo-z's the precision needed to play the roles in the DES SN analysis
+mentioned above. 
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{photoz_dimhost_1.eps}}
+\caption{Using simulated photo-z's trained on a sample with $m_i<24$, but 
+applied to a dimmer sample with $24<m_i<26$, the photo-z precision is 
+presented for $0.8<z<1.0$ for the DES 5-field hybrid strategy. 
+\textit{Top}: Histogram of host galaxy photo-z minus the true 
+redshift (RMS=0.074, $\sigma=0.047$); note that there are 514 total entries with 19 underflows and 9 overflows. \textit{Bottom}: histogram of SNe photo-z (with the host 
+galaxy photo-z used as a prior in the fit) minus the true redshift (RMS=0.053, $\sigma=0.042$).
+Similar histograms for $1.0<z<1.2$ demonstrate the following widths: 
+Host galaxy only (RMS=0.09, $\sigma=0.059$), SN with host prior 
+(RMS=0.079, $\sigma=0.045$);  note that there are 514 total entries with 4 underflows and 0 overflows}
+\label{fig:photoz_dimhosts}
+\end{figure}
+
+\subsection{Accuracy of photometric redshifts}
+The DES photo-z's will come from a combination of host galaxy photo-z 
+and SN photo-z measurements. The host galaxy photo-z is expected to be 
+relatively accurate since each SN field will be sampled more than one 
+hundred times over the five-year survey. The limiting magnitudes of the
+SN host galaxy, 1-season co-add will be $\sim$26th mag, compared to 
+$\sim$24th mag for the standard DES field. The limiting 
+magnitude of a 5-season co-add will be $\sim$27th mag. 
+DES expects to have at least 60K host galaxy spectroscopic redshifts 
+for training photo-z's (H. Lin, private communication, 2011). In our simulations, the host galaxy photo-z is 
+determined by a neural-net algorithm described in \cite{oya08}. Also from \cite{oya08}, 
+the photo-z error is estimated by the Nearest Neighbor Error algorithm.
+Figs.~\ref{fig:photoz_scatterplot} \&~\ref{fig:photoz_hists} show scatter 
+plots of photometric versus true redshifts for galaxies with a magnitude less than 24th and the 
+histograms for the difference of host/SN photometric redshifts and true redshifts, 
+respectively. The host galaxy photo-z's have a Gaussian sigma of $\sim$0.027 and 
+a non-Gaussian tail. The SN photo-z is fit with \snana, using the host galaxy photo-z 
+as a prior~\citep{kes10}, is seen to have a Gaussian sigma of $\sim$0.022 and much-reduced 
+tails. When added to the spectroscopic redshifts provided by SN follow-up, these 
+redshifts are precise enough to begin an interim analysis of 
+DES SNe before host spectra are available.
+
+\subsection{Photometric redshifts for hosts without spectra}\label{sec:dimhosts}
+The second role for photo-z's is to supplement 
+redshifts from host spectra at high-z, assuming the host
+spectra are only available for $m_i<24$.  
+We have prepared a simulated sample (detailed in  Appendix \ref{apdx:hosts}) 
+of galaxy photo-z's that has been 
+trained on a sample of $m_i<24$ galaxies, but has then been 
+applied to galaxies with $24<m_i<26$. Fig.~\ref{fig:photoz_dimhosts} 
+shows histograms of the host photo-z residuals from this sample, and the combined SNe+host
+photo-z.  We will investigate the impact of using these photo-z's 
+on a cosmology analysis in $\S$\ref{sec:cosmo}. 
+
+At this time,  we are assuming that SNe with hosts dimmer than $m_i=26$ 
+will not be used in a cosmology analysis,  although with a 
+5-season co-add it is likely that many of those hosts will
+be observed and may provide an interesting sample to study.
+
+\section{Supernova analysis with spectroscopic redshifts}\label{sec:specz_anal}
+In this section, we discuss SNIa analysis for the case where every SN has a 
+spectroscopic host-galaxy redshift, and correct SNIa identification is assumed
+(see $\S$\ref{sec:misid}), 
+with an emphasis on the extraction of distance estimates. In order to 
+enhance the robustness of our results, we employ both the {\mlcs} and {\salt} models 
+to simulate and fit SN light curves. 
+For {\mlcs}, we consider cases of fitting both with and without correct priors 
+on host galaxy extinction.
+
+\subsection{{\mlcs} light curve fitting with full priors}\label{sec:lcfit_p}
+The use of a prior on the \mlcs\ extinction parameter \av\ improves the 
+determination of the distance modulus when the measurement error on \av\ 
+becomes wider than the width of the \av\ distribution. The improvement is noticeable 
+in the simulated DES data at high redshifts where the SN colors are determined 
+by measurements in only three bands: $r$, $i$, and $z$.  However, 
+the use of a prior is susceptible to the introduction of biases if implemented with
+incorrect information. While measurement errors, in principle, 
+average to zero when the measurements of many SNe are combined, a bias in the 
+prior will not average to zero.  Inaccuracies in the prior, which is essentially 
+the distribution of SNe in \av,  can arise from purely experimental 
+errors. However, unknown astrophysics, including the evolution of the host galaxy 
+population or the SN colors with redshift, pose serious challenges to the use 
+of a prior in a high precision survey like the DES.  While we do provide some estimate 
+of potential systematic errors resulting from the use of a prior based on the SDSS 
+analysis, our estimates must currently be considered preliminary.
+
+For the analysis presented here, the prior has the following definition:
+\be
+P_{\rm prior} = P(A_{\rm V})\times P(\Delta)\times\epsilon_{\rm cuts}(z,A_{\rm V},\Delta)\rm,
+\label{eqn:prior}
+\ee
+where $P(A_{\rm V})$ \& $P(\Delta)$ are the underlying 
+physical $A_{\rm V}$ \& $\Delta$ (luminosity parameter) distributions and $\epsilon_{\rm cuts}$ is the 
+fraction of SNe that pass the selection cuts for a given redshift, $A_{\rm V}$, \& $\Delta$. 
+For this work, following \cite{kes09}, $P(A_{\rm V})$ is given 
+by $dN/dA_{\rm V}$ = $exp(-A_{\rm{V}}/\tau_{A_{\rm V}}$) with $\tau_{A_{\rm V}}$ = 0.334, and $P(\Delta)$ is an 
+asymmetric Gaussian with peak position, $\Delta_0$, and positive and negative side 
+widths, $\sigma_+$ and $\sigma_-$, respectively, given by $\Delta_0$ = $-$0.24, 
+$\sigma_+$ = $+$0.48, $\sigma_-$ = $+$0.23. In addition, we set $dN/dA_{\rm V}$=0 for \av$<$0.
+
+For a given survey, e.g., the 5-field DES hybrid scenario, $\epsilon_{\rm cuts}$ is calculated 
+using \snana\ by cyclically simulating SN light curves and checking which light curves pass the 
+defined selection cuts until the desired efficiency accuracy is reached.
+Fig.~\ref{fig:eff} shows the selection efficiencies for various classes of SNIa. 
+Both the deep and shallow observation fields within the 5-field hybrid survey exhibit statistical 
+completeness for nearby and/or bright SNe. However, 
+Fig.~\ref{fig:eff} shows the vastly higher efficiency of the deep relative to the shallow fields for 
+distant and faint and/or heavily extincted SNe. Figure~\ref{fig:Dmu_mlcs_p} shows our application 
+of efficiencies to the hybrid survey simulation in order to avoid the bias in the fitted distance 
+modulus that would arise from {\mlcs} light curve fitting with an incorrect prior, e.g., one with 
+the assumption of a flat prior on efficiency.
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0,width=75mm]{simeff_plots.eps}
+\caption{Plotted from top to bottom is the efficiency due to the selection cuts 
+discussed in $\S$\ref{sec:fields} as a function of the extinction parameter, $A_{\rm V}$, 
+for the DES deep and shallow fields assuming the 5-field hybrid strategy. 
+The efficiencies were calculated to an accuracy 
+of 1\% for a given redshift and value of $\Delta$, $A_{\rm V}$, and $R_{\rm V}$. 
+The vertical error bars show the range in efficiency for an extreme variation in $R_{\rm V}$  
+from 0.5 to 4.00 in a given $A_{\rm V}$ bin. For the purposes of this plot, the 
+pre- and post-epoch cuts were disabled. This was done in order to show the efficiencies 
+without edge 
+effects which reduce the peak efficiencies by approximately 10-15\% for the 
+cases in the top three panels.
+}
+\label{fig:eff}
+\end{center}
+\end{figure}
+
+As discussed above, the introduction of priors can easily lead to biases if the 
+effects of the survey selection efficiency are poorly understood. 
+Of particular concern is the bias manifested as a difference between observed 
+(i.e. ``fitted'') and true (i.e., ``simulated'') distance modulus (``$\mu_{\rm fit}$'' 
+and ``$\mu_{\rm sim}$'' hereafter) that can arise. Figure~\ref{fig:Dmu_mlcs_badp_shallow} 
+shows such a departure of $\mu_{\rm fit}$ -- $\mu_{\rm sim}$ from zero 
+beyond a redshift of $\sim$0.7. The bias illustrates the size of the $\mu$-correction 
+that the DES SN data would need if the efficiency prior were incorrectly assumed to be flat.
+Note, one does not expect the selection bias to have a significant effect at low redshift 
+because there the SN sample is essentially complete. The fact that $A_{\rm V}$ is 
+driven toward zero, while the trend in $\Delta$ is negative, as redshift increases 
+beyond $\sim$0.5 (see Fig.~\ref{fig:avdel}), implies that only less extincted 
+and/or brighter SNe pass the selection cuts, and strongly supports our 
+identification of the bias in $\mu$ as a selection bias. In addition, this selection effect explains
+the small drop in RMS beyond a redshift of z=1.0 exhibited in Fig.~\ref{fig:Dmu_mlcs_p}. Figure~\ref{fig:Dmu_mlcs_badp} 
+also shows, when compared to Fig.~\ref{fig:Dmu_mlcs_badp_shallow}, one of the key motivations for 
+the hybrid survey. A systematic check is enabled by the ability to compare the less biased 
+distance moduli from the deep part of the 
+dataset at higher redshifts with the more biased shallow part. If that crosscheck is validated,
+then confidence is increased in the highest region of the deep component of the survey (i.e., redshifts greater 
+than 1.0) where the deep component suffers a similar bias to that experienced by the shallow
+component at intermediate redshifts.
+Fig.~\ref{fig:Dmu_mlcs_badp_deep}, showing the case of the deep-only strategy, 
+is included for completeness. 
+
+\subsection{\mlcs\ light curve fitting with flat priors \& {\salt} fitting}\label{sec:lcfit_nop}
+In this section, we discuss \mlcs\ flat-prior and {\salt} model fitting. 
+Such fits avoid the issue of selection efficiency bias discussed above. 
+The trade-off is an increase in the RMS spread in the distance modulus, as is clearly 
+evident in the comparison of Fig.~\ref{fig:Dmu_mlcs_p} with Fig.~\ref{fig:Dmu_mlcs_nop}. 
+In addition, Fig.~\ref{fig:Dmu_mlcs_nop} shows a high-redshift $\mu$ bias evident in {\mlcs} fits 
+with flat priors. This is due to the fact that such fits allow negative values of \av, for which
+the fitter compensates by pulling the distance modulus to higher values.
+
+
+The {\salt} light curve fitter in {\snana} is accompanied by a separate program 
+called {\saltm} \citep{mar11} that fits the \salt\ parameters $\alpha$ and $\beta$ that are used to 
+determine the standard SNIa magnitudes. 
+The parameters that correlate distance modulus with $x_1$ (a stretch-like parameter) 
+and $c$ (the color) are $\alpha$ and $\beta$ respectively. 
+We have chosen to fit for the $\alpha$ and $\beta$ parameters independent of the 
+cosmology using \saltm, which allows us to apply the same  cosmological fitting 
+procedure to the outputs of the {\mlcs} and {\salt} light curve fits.
+
+The resulting distance modulus residuals are shown in Fig.~\ref{fig:Dmu_salt}. The trend in 
+the RMS spread of the distance modulus is rather similar to that obtained with {\mlcs} 
+with the use of a flat prior. While it would be possible to apply a prior on the 
+color in the SALT2 fit, we have followed normal practice in not doing so here.  
+For the remainder of this paper, we will use {\mlcs} fits with correct
+priors (corresponding to Fig.~\ref{fig:Dmu_mlcs_p}) in our analysis, with the exception that 
+we use \snoop\ in $\S$\ref{sec:video} and include {\salt} in the discussion of the DES SN cosmology fits in $\S$\ref{sec:cosmo}.
+
+\onecolumn
+\begin{figure}[ht!]
+\captionsetup[figure]{margin=10pt}%
+
+\subfloat[{\mlcs} fit for the 5-field hybrid strategy with correct priors (see Eqn.~\ref{eqn:prior}). 
+\label{fig:Dmu_mlcs_p}]
+{\includegraphics[width=2.15in]{Ia_specz_host_merged_dmu_only.eps}}
+\subfloat[{\mlcs} fit for the 5-field hybrid strategy with flat priors.\label{fig:Dmu_mlcs_nop}]
+{\includegraphics[width=2.15in]{Ia_specz_host_noprior_merged_dmu_only.eps}}
+\subfloat[{\salt} fit for the 5-field hybrid strategy.\label{fig:Dmu_salt}]
+{\includegraphics[width=2.15in]{Ia_salt2_cdist_specz_host_salt2_combo_merged_dmu_only.eps}}\\
+\subfloat[{\mlcs} fit for the 5-field hybrid strategy using a prior based on the underlying \av\ distribution but not the simulated efficiency (see Fig.~\ref{fig:eff} for example efficiencies).\label{fig:Dmu_mlcs_badp}]
+{\includegraphics[width=2.15in]{Ia_specz_host_nosimeff_merged_dmu_only.eps}}
+\subfloat[{\mlcs} fit for deep strategy using a prior based on the underlying \av\ distribution but not the simulated efficiency.\label{fig:Dmu_mlcs_badp_deep}]
+{\includegraphics[width=2.15in]{Ia_deep_specz_host_nosimeff_combo_merged_dmu_only.eps}}
+\subfloat[{\mlcs} fit for shallow strategy using a prior based on the underlying \av\ distribution but not the simulated efficiency.\label{fig:Dmu_mlcs_badp_shallow}]
+{\includegraphics[width=2.15in]{Ia_wide_specz_host_nosimeff_combo_merged_dmu_only.eps}}
+
+\caption{Plotted is the fitted distance modulus residual ($\mu_{\rm fit}$ - $\mu_{\rm sim}$) for 
+different SN light curve fitting scenarios. Dashed lines are drawn at zero for clarity.}
+\label{fig:Dmu}%
+\end{figure}
+\twocolumn
+
+\begin{figure}
+\centerline{\includegraphics[angle=0,width=75mm]{avdel_plot.eps}}
+\caption{Plotted from top to bottom is the fitted A$_{\rm V}$ 
+histogram, the fitted $\Delta$ histogram, the redshift dependence of simulated \& fitted \av, 
+and redshift dependence of simulated \& fitted $\Delta$, both averaged within a redshift bin,
+assuming the 5-field hybrid strategy. Note that the lowest redshift bin has low SN statistics 
+(see Fig.~\ref{fig:nsn_4surveys}).}
+\label{fig:avdel}
+\end{figure}
+
+\section{Type Ia supernova sample purity}\label{sec:misid}
+
+Since the DES SNIa sample will not have full spectroscopic SN follow-up, cases
+where core-collapse SNe (SNcc) are misidentified as SNIa 
+will be a concern for a cosmology analysis based on the full sample. 
+In order to address this issue, we have undertaken an 
+analysis of the DES SNIa sample purity using \snana\ simulations. In this study,
+we perform a mock-analysis using redshifts determined from the visible host galaxies.
+We have limited measurements of SNcc types, rates, and brightness, but our knowledge of SNcc 
+is lacking in several areas, as discussed in detail below.  There are substantial 
+uncertainties in the absolute rate of SNcc,  
+mean absolute magnitudes and their variance, relative fractions of the 
+different types of SNcc, and variation in the light curve shapes 
+that are not adequately represented in the simulation.
+This section will address these uncertainties and provide estimates of their effect on 
+SNIa sample purity.  In general, where there are choices to be made, we
+make the choice that will increase the amount of misidentification in order
+to see the worst-case effect on a cosmology analysis, as discussed in 
+$\S$\ref{sec:cosmo}.
+
+\subsection{Core collapse input rate}\label{sec:ccrate}
+
+In order to simulate SNcc, we use the input
+SN rate parametrization of \cite{dil08}, which found the SNIa rate from SDSS to be of the
+form $\alpha(1+z)^{\beta}$ with $\alpha_{Ia}$ = 2.6$\times$10$^{-5}$
+with $\alpha_{Ia} = 2.6\times 10^{-5}$ SNe $h_{70}^{3}$ 
+Mpc$^{-3}$ yr$^{-1}$, 
+and $\beta_{Ia}$ = 1.5. For SNcc, we take $\beta_{cc}$ = 3.6 to match
+the star formation rate. Various studies, the most recent being
+SNLS \citep{baz09}, have shown this assumption to be valid,
+albeit with low statistics and limited redshift range.  This
+leaves the determination of $\alpha_{cc}$. Taking the ratio of
+SNcc/Ia to be the SNLS value of 4.5 for redshifts of $<0.4$ \citep{baz09}, we
+calculate the value $\alpha_{cc}$ must have in order to obtain the ratio of 4.5:  
+$\alpha_{cc} = 6.8\times 10^{-5}$ SNe $h_{70}^{3}$ 
+Mpc$^{-3}$ yr$^{-1}$.
+Note that with this value of $\alpha_{cc}$, the SNcc/Ia ratio increases to $\sim$ 10 out to a 
+redshift of 1.2. 
+A caveat in this estimate is 
+that one of the largest uncertainties is the actual population near the detection threshold. 
+Direct measurements of the 
+SNcc rate beyond a redshift of z=0.4 would be very helpful in the determination of 
+SNIa sample purity.
+
+\subsection{Relative fractions of core collapse types}
+
+In this section, we discuss the relative fraction of the SNcc subtypes.
+The most important fraction is that of Type Ib/c, since they most commonly pass
+the combination of cuts on SNRMAX and {\mlcs} fit-probability that the SN is a SNIa ($f_p$=$P_{\chi^2}$, the probability from fit $\chi^2$ and the number of the degrees of freedom).
+The literature contains several estimates of the ratio of Type Ib/c to Type Ib/c
+plus II SNe (see Tab.~\ref{tab:Ibcfraction} for examples). 
+The most complete references, in terms of fractions being given for each type of SNcc, are \cite{li11} and \cite{sma09}, and the Type Ib/c fractions
+are in good agreement. We have used the \cite{sma09} values (see Tab.~\ref{tab:ccfrac})
+as the default set of fractions in this analysis, as they give a more 
+conservative amount of SNcc misidentification relative to \cite{li11}.
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|}\hline
+Reference & Ib/c fraction\\
+\hline
+\cite{li11} & 24.6 $\pm$ 4.6\% \\
+\cite{li07} & 26.5 $\pm$ 5.4\% \\
+\cite{van05} & 24.7 $\pm$ 2.6\% \\
+\cite{sma09} & 29.3 $\pm$ 4.7\% \\
+\cite{pri08} & 24.7 $\pm$ 4.9\% \\
+\cite{lea09} & 33.3 $\pm$ 4.3\% \\
+\hline
+\end{tabular}
+\caption{References for the relative fraction of Type Ib/c SNe (number of Type Ib/c divided by
+the total number of SNcc of all types).}
+\label{tab:Ibcfraction}%
+\end{table}
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|}\hline
+SN Type & Relative SNcc Fractions\\
+\hline
+IIP & 0.587 $\pm$ 0.05 \\
+Ib/c & 0.293 $\pm$ 0.05 \\
+IIL $+$ IIb & 0.082 $\pm$ 0.03 \\
+IIn & 0.038 $\pm$ 0.02 \\
+\hline
+\end{tabular}
+\caption{The relative fraction of collapse SNe subtypes (number of a given subtype divided by total number of SNcc of all types) used in this analysis, 
+as taken from \cite{sma09}.}
+\label{tab:ccfrac}%
+\end{table}
+
+\subsection{Core collapse brightness}
+The absolute brightness of SNcc is a critical parameter in
+the number of SNcc misidentified as SNIa,  since most are 
+too dim to pass typical SNRMAX cuts (e.g., those shown in Tab.~\ref{tab:cuts}).  Two references for absolute 
+SNcc brightnesses, \cite{ric02} and 
+\cite{li11}, are compared in Tab.~\ref{tab:cc1rich} 
+and Tab.~\ref{tab:cc1li11}. The numbers in 
+Tab.~\ref{tab:cc1rich} have been corrected 
+for the significant Malmquist 
+bias evident in that data.  The correction 
+assumed a threshold of 16 magnitudes in apparent 
+brightness, and took into account 
+the larger volume sampled by intrinsically brighter SNe than
+for fainter SNe.  The volume-limited analysis 
+in \cite{li11} is already corrected for Malmquist bias, 
+but \cite{con11} used \cite{ric02} in their analysis, 
+noting that \cite{li11} perhaps missed a bright 
+Type Ib/c component by avoiding low-luminosity galaxies.  To take 
+the conservative approach, we used the single-Gaussian-approximation 
+brightnesses from \cite{ric02} as our 
+default.
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|c|}\hline
+\cite{ric02} & &\\\hline
+SN Type & $M_{B}$ & $\sigma_{M_{B}}$\\
+\hline
+IIP & $-14.40\pm 0.42$ & 0.81 \\
+Ib/c & $-16.72\pm 0.23$ & 0.62 \\
+IIL & $-17.19\pm 0.15$& 0.47 \\
+IIn & $-17.78\pm 0.41$ & 0.74 \\
+\hline
+\end{tabular}
+\caption{The absolute B-band magnitudes and widths for the single Gaussian fits
+from \cite{ric02}, corrected for Malmquist bias.}
+\label{tab:cc1rich}%
+\end{table}
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|c|}\hline
+\cite{li11} & &\\\hline
+SN Type & $M_{R}$ & $\sigma_{M_{R}}$\\
+\hline
+IIP & $-15.66\pm 0.16$ & 1.23 \\
+Ib/c & $-16.09\pm 0.23$ & 1.24 \\
+IIL & $-17.44\pm 0.22$& 0.64 \\
+IIn & $-16.86\pm 0.59$ & 1.61 \\
+\hline
+\end{tabular}
+\caption{The absolute R-band magnitudes and widths 
+from \cite{li11}.}
+\label{tab:cc1li11}%
+\end{table}
+
+\subsection{Core collapse templates}
+
+SNcc are observed to be a much more heterogeneous class than SNIa and, in contrast to SNIa, 
+there is no parametrization available that describes the diversity of SNcc light curves.
+Therefore, we take a template approach to modeling SNcc. 
+Three sets of templates are compared, with each being a spectral 
+sequences as a function of time.  The first set 
+are 40 templates from the Supernova Photometric Classification 
+Challenge~\citep{SNchall}, the second set are the
+composite spectral templates constructed by 
+Nugent\footnote{http://supernova.lbl.gov/\%7Enugent/nugent\_templates.html; see also \cite{nug02}.}, 
+and the third set are Type Ib/c and IIP templates from \cite{sak11}, augmented by the 
+Nugent templates for Types IIL and IIn.   
+All templates were converted to SDSS filter magnitudes, and \snana\ performs the K-corrections
+into the DES filters.  Note that there is no template for Type IIb,  which in \cite{li11} 
+is more numerous than Types IIL or IIn.  The Type IIL template is expected to be the closest 
+to Type IIb SNe, and, therefore, we used it for the Type IIb sub-sample.
+
+In the \snana\ simulation, the templates are corrected to the absolute brightnesses 
+discussed in the previous section.  In addition,  the Nugent templates are
+composite spectra and do not include absolute brightness fluctuations, 
+therefore they are also smeared by the Gaussian-fitted widths tabulated in the 
+previous section in order to better reflect the observations.  
+The \cite{SNchall} and \cite{sak11} templates already have sufficient variation in 
+brightnesses and require no additional smearing.  The templates from 
+the Supernova Photometric Classification Challenge are the most complete set and 
+are used as the default in the rest of this paper. In particular, note 
+that these templates contain a ``1+z$_{temp}$'' bug in that each SNcc 
+template 
+is too dim  by a factor of 1+z$_{temp}$ \citep[see Tab. 4 and $\S$2.6 of][]{SNchall}, 
+where z$_{temp}$ is the redshift of the template.
+In the next section, we include a discussion of the effect of this bug on 
+our simulations.
+
+\subsection{Sample purity results}
+
+Using the inputs discussed above, and spectroscopic host redshifts, 
+we simulated the DES SN sample including
+SN Types Ia, Ib/c, IIL, IIn, and IIP subject to the selection criteria listed 
+in Tab.~\ref{tab:cuts}. The SNe in this combined sample are fit to the 
+SNIa {\mlcs} model, giving a fit probability $f_p$ variable cut that can be 
+%optimized 
+customized for each analysis, and for the amount of SNcc observed in a 
+sub-sample with spectroscopic follow-up. Figure~\ref{fig:fp} shows the 
+distribution of $f_p$ for the SNIa and SNcc samples,  after all other
+selection cuts have been applied.  The number of SNe of each type with 
+no $f_p$ cut, and with $f_p>0.1$, is shown in
+Tab.~\ref{tab:ccnum1gauss}. For those results, the effect of the 1+z$_{temp}$ 
+SNcc template bug discussed at the end of the previous 
+is an increase in the SNIa purity by $\sim$2\%, 
+which has no impact on our conclusions.
+%\footnote{Note that the 
+%Tab.~\ref{tab:ccnum1gauss} results are subject to a bug with a known 
+%fix that does not have an effect on our 
+%conclusions (see the figure caption).}. 
+Figures~\ref{fig:cc_types} 
+and \ref{fig:Ia_vs_cc} show redshift distributions of these samples 
+subject to a
+fit probability cut $f_p>0.1$. Table~\ref{tab:cccompare} shows comparisons
+in the total SNcc number with variations in the simulation inputs discussed 
+above, with a range of $\times 3$ in total sample SNcc.  
+Note that the sample purity is better than that
+obtained with the same analysis performed in \cite{SNchall};  this
+is due to the correction for Malmquist bias applied to 
+the core collapse simulation sample, which reduces their 
+expected absolute brightness and therefore the number passing
+SNRMAX cuts.
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0,width=75mm]{fp_compare.eps}
+\caption{Plotted are the SNIa fit probabilities for the SNIa and 
+SNcc samples,  after all other selection cuts are applied.}
+\label{fig:fp}
+\end{center}
+\end{figure}
+
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|c|c|}\hline
+Sample & $f_p>$0.0 & $f_p>$0.1 & Tot. simulated\\
+\hline
+Ib/c       & 571 &   57 & 53514\\
+IIP       &  110 &   2 & 107210\\
+IIn       &  225 &   2 & 6940\\
+IIL       &  62 &   2 & 14976\\
+\hline
+Tot. SNcc  &  968 & 63 & 182640\\
+\hline
+Ia        & 3482 & 3350 & 18695\\
+\hline
+Ia$+$SNcc  &  4450 & 3413 & 201335\\
+\hline
+Ia Purity &  78\% &    98.1\% & $n/a$ \\
+\hline
+\end{tabular}
+\caption{Number of simulated SNe passing cuts and sample purity using 
+the DES 10-field hybrid strategy for SNIa fit probability, $f_p$ cuts of 0.0 
+and 0.1. Note that employing $f_p>0.2$ reduces the number of SNIa and SNcc 
+passing cuts by 5\% and 46\%, respectively. However, given that the impact of 
+SNcc on the DES cosmological constraints is already negligible assuming 
+$f_p>0.1$ (see $\S$\ref{sec:cosmo}), opting for $f_p>0.2$ 
+is unwarranted due to the loss of SNIa. Note that these results 
+were obtained with \snana\ v8\_37, which includes a known bug 
+due to each SNcc template being too dim by a factor of 1+z$_{temp}$ 
+\citep[see $\S$2.6 of][]{SNchall}, where z$_{temp}$ is the redshift of the template. 
+We have verified that employing 
+fixed versions, e.g., v9\_89, results in a small ($\sim$2\%) purity 
+variation that does not have an effect on 
+our conclusions.}
+\label{tab:ccnum1gauss}%
+\end{table}
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|}\hline
+Simulation Input & Total SNcc\\
+\hline
+Defaults & 63 \\
+Nugent templates & 27 \\
+Sako et al. templates & 44 \\
+Li et al. abs. magnitudes & 8\\
+\hline
+\end{tabular}
+\caption{Total SNcc counts with variations in the simulation inputs assuming the 10-field
+hybrid strategy, with $f_p>$0.1. The line labeled ``Defaults'' is the same as the Total SNcc in 
+Tab.~\ref{tab:ccnum1gauss}.}
+\label{tab:cccompare}%
+\end{table}
+
+\onecolumn
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0,width=150mm]{CC_SNchall_specz_host_combo_merged_Ibc_rest.eps}
+\caption{Plotted are the histograms showing the projected DES redshift distributions
+for the Type Ib/c SNe and the summed distribution of other core collapse SNe, 
+assuming the 10-field hybrid survey, the selections criteria in Tab.~\ref{tab:cuts}, and $f_p>$0.1.}
+\label{fig:cc_types}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0,width=150mm]{CC_SNchall_specz_host_combo_merged_stacked_Ia.eps}
+\caption{Plotted are the redshift distributions for the projected DES SNIa and non-Ia SN samples
+assuming the 10-field hybrid strategy, the selections criteria in Tab.~\ref{tab:cuts}, and $f_p>$0.1.}
+\label{fig:Ia_vs_cc}
+\end{center}
+\end{figure}
+\twocolumn
+
+\section{Supernova colors, dust extinction, and infrared data}\label{sec:dust}
+The study of SN colors is a rich subject that is
+of crucial importance to SN cosmology. The issue of 
+confusion between intrinsic color variations and dust extinction, 
+which complicates the measurement of the former, is beyond the scope 
+of this paper.  Instead, we demonstrate the DES sensitivity to variations 
+of the traditional, redshift-independent dust parameters
+\av\ and \rv\ \citep{car89}. Color measurements in the DES will
+be improved by the enhanced red sensitivities of the CCDs, 
+as discussed in $\S$\ref{sec:intro}.
+
+\vspace{0.5cm}
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{avrv_fig1_v1.eps}}
+\caption{Average DES $g-z$ color difference versus phase assuming the 5-field
+hybrid strategy for a simulation with 
+\rv\ = 2.69 and \tauav\ = 0.25, as compared to the reference simulation with
+\rv\ = 2.18 and \tauav\ = 0.334. Error bars are the error on the mean 
+color difference. The solid, horizontal line above zero shows 
+the fitted average $g-z$ color difference for phase $<$ +11 days.
+Note that since the quantity plotted a difference between colors, 
+the errors, which are the quadrature sum of the errors on the 
+mean of each color, are correspondingly large.
+}
+\label{fig:avrv1}
+\end{figure}
+
+\subsection{Sensitivity to \av\ and \rv\ }\label{sec:avrv}
+We perform an analysis of the color variations in the SN colors $g-i$,  $g-z$,  $r-i$,
+and $r-z$ for a grid of values of  \rv\ and \tauav, 
+where \tauav\ is the parameter that controls the width of the 
+simulated \av\ distribution, as described in $\S$\ref{sec:lcfit_p}. 
+As \tauav\ increases, the \av\ distribution extends
+to larger extinctions and, thus, produces SNe with redder colors.
+Our reference color sample is a simulation with the 
+values of \rv\ = 2.18 and \tauav\ = 0.334, which are the best fit values from \cite{kes09}. 
+The results presented here are for the redshift range $0.4<$z$<0.7$. This range has the highest
+SN statistics for the DES. For the redshift range z$<0.4$, the SN statistics are 
+much less, but SNRMAX is substantially
+better, so that the precision of the color measurements are comparable to those
+presented here. 
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{avrv_fig2_v2.eps}}
+\caption{Average DES $g-z$ color difference assuming the 5-field hybrid strategy
+ for phase $<$ +11 days compared to the reference 
+simulation with \rv\ = 2.18 and \tauav\ = 0.334 as a function of 
+R$_{\rm V}$ and for a range of \tauav. Error bars are the 
+error on the mean color difference. Note the isolated points for 
+\tauav\ = 0.28 and 0.39. We use these points to set the values 
+of the 1$\sigma$ errors in \rv\ and \tauav\ to be 0.38 and 0.06, respectively.
+}
+\label{fig:avrv2}
+\end{figure}
+
+We constructed a suite of simulations with a grid of \rv\ and \tauav\ values in order
+to assess the effects of changes in \rv\ and \tauav\ on SNIa colors. An example
+of the effects on the $g-z$ color is shown in Fig.~\ref{fig:avrv1}.
+The differences in color between simulations with \rv\ = 2.69 and \tauav\ = 0.25
+and our reference sample parameters is shown as a function of phase.
+A signal-to-noise cut of 0.5 is applied at every phase. 
+Fig.~\ref{fig:avrv1} has two noteworthy features: the fitted average 
+color level for phase $<$ +11 days and the significant drop in color for later phases.
+The average color level of a given SN color for phase $<$ +11 days has, in general, a
+complicated dependence on \rv, \tauav, and the redshift range of the 
+data sample. In special cases, for simulations with fixed \rv, \av, and 
+certain values of fixed redshift, this dependence can be predicted from the 
+CCM dust model \citep{car89} and the parametrization from \cite{jha07}. 
+We have verified that our simulations agree well with the predictions in these cases.   
+
+The sensitivity to parameters \rv\ and \tauav\ of the small-phase average $g-z$ difference 
+is shown in Fig.~\ref{fig:avrv2}. The error bars show the statistical 
+uncertainty for each parameter choice. 
+Overall, the trend is to increase the value of the $g-z$ difference by approximately
+0.3 magnitudes as \rv\ increases from 1.1 to 3.1, which is a
+plausible range for \rv, and \tauav\ increases from 0.16 to 0.52. 
+From this figure, simulated values of \rv\ within $\sim$0.38 of
+the reference value, and of \tauav\ within $\sim$0.06 of the 
+reference value, can be distinguished at the $1\sigma$ level.
+Similar plots for other SN colors and other redshift ranges show slightly
+different dependencies on the parameters, and hence can be used to lower further
+the above uncertainties in \rv\ and \tauav.
+Fig.~\ref{fig:avrv2} also shows several degenerate combinations of \rv\ and 
+\tauav\ that lead to the same level of $g-z$ difference.
+This occurs because SN colors are largely dependent only on the ratio of
+\av\ to \rv, and so a given color difference can only determine
+the ratio of \av\ to \rv\ to some uncertainty.
+This degeneracy is reduced by
+considering the behaviors of other color differences and their redshift dependence.
+In addition, the second feature of Fig.~\ref{fig:avrv1}, 
+namely the drop-off in the $g-z$ difference at late phases\footnote{This drop-off is due to an effect of the SNRMAX cut: for redshifts greater than $z \approx 0.4$, where the DES is no longer fully efficient, the SNRMAX cut is more likely to remove the fainter, redder SNe at late phases.}, can also be used to resolve 
+this degeneracy.
+In this analysis, we assume that the degeneracy can be broken by an
+SDSS-like analysis \citep{kes09}, which took all such effects into consideration.
+Therefore, in our analysis in $\S$\ref{sec:cosmo}, we take the uncertainty in \rv\ and \tauav\ 
+to be 0.38 and 0.06, respectively. 
+
+\subsection{VIDEO survey and additional infrared overlap}\label{sec:video}
+
+\subsubsection{The DES+VIDEO overlap}\label{sec:opportunity}
+The infrared VISTA Deep Extragalactic
+Observations (VIDEO) Survey \citep[see, e.g.,][]{video}, using the Visible and Infrared Survey Telescope for Astronomy
+at the Paranal Observatory in northern Chile, began science observations in
+late 2009. This 5-year survey has an area of 12 deg$^2$ covering 4.5 deg$^2$ in XMM-LSS, 
+4.5 deg$^2$ in \textit{Chandra} Deep Field South, and 3 deg$^2$ in ELAIS S1, with deep observations 
+in the \emph{Z}, \emph{Y}, \emph{J}, \emph{H}, \emph{K}$_s$ filter set.
+The survey is designed to trace galaxy evolution out to a redshift of 4, 
+and also provides for a large-volume SN search projected to 
+find 250 SNcc and 100 SNIa with a median redshift of 0.2.
+
+The VIDEO Survey SN fields overlap those for the DES (see Tab.~\ref{tab:fields}). 
+The extension of optical SNIa light curves to include infrared data points enables
+an enhanced determination of SN colors and dust extinction 
+due to the larger lever arm provided
+by the increased wavelength range. 
+As emphasized by \cite{fre09}, which presented the first
+$i$-band Hubble diagram obtained by the Carnegie SN Project,
+infrared SN observations offer advantages in reducing several systematic
+effects, the most notable of which is reddening due to dust. In
+particular, near-infrared observations can be used to obtain a SN data set
+that is insensitive to variations in SN color, and therefore
+facilitate the best rate assessments for different SN types and their
+dependence on host galaxy properties. In order to simulate expected
+results from a combined DES+VIDEO dataset, we incorporated
+the optical+infrared \snoop\ SN light-curve model \citep{bur11} into
+\snana. Such a dataset, even with modest SN statistics, enables the pursuit of
+reduced-extinction systematics studies. 
+
+\subsubsection{The DES+VIDEO supernova sample}\label{sec:sample}
+Based on VIDEO Survey SN data from the first season, we constructed a \snana\ simulation
+library (see $\S$\ref{sec:siminputs}) with the following
+characteristics: typical \emph{Y-} and  \emph{J-}band PSF 
+is of order 1~arcsec, sky noise on the order of 200-400 photoelectrons, and 
+zeropoints ranging from 31.5 to 32.0 magnitudes. 
+Two seasons of VIDEO/DES overlap are expected, and the simulation library assumes that
+the observing conditions will be similar during both seasons. 
+In addition, there are 10 observations in $Y$-band and 13 in $J$-band, each with
+32 minutes of exposure time. 
+Based on this simulation library, we estimate
+that the DES+VIDEO combined SNIa sample from years 2013 and 2014 could
+consist of approximately 108 SNe with z$<$0.5 in the common
+\textit{Chandra} Deep Field South, XMM-LSS, and ELAIS S1 fields (see
+Tab.~\ref{tab:fields}). Figures~\ref{fig:video_snr} and
+\ref{fig:des_video_simlc} show VIDEO SNRMAX for the 108 overlapping 
+SNe, and an example 
+simulated combined light curve, respectively. As shown in 
+Fig.~\ref{fig:video_snr}, some of the SNe have SNRMAX 
+that are relatively low (e.g., $<5$), and may not be useful for
+all SNe analyses. As a follow-on to this analysis, a study is planned to
+utilize \snana\ simulated DES+VIDEO SNIa light curves to
+evaluate the benefit to SN color determinations to be gained by adding
+VIDEO infrared SNIa data to the DES SN analysis. 
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{video_snr.eps}}
+\caption{SNRMAX as a function of redshift for the VIDEO \emph{Y}- and 
+\emph{J}-bands.}
+\label{fig:video_snr}
+\end{figure}
+
+\onecolumn
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=150mm]{des_videolc_10019_z0_24.eps}}
+\caption{Example simulated Type Ia SN light curve forecast displaying
+combined DES and VIDEO Survey data assuming the
+DES 5-field hybrid strategy. The points are a \mlcs\ fit and the band is the fit error. The wavelength
+ranges in nanometers of the pass-bands indicated are: 400--550
+(\emph{g}-band), 560--710 (\emph{r}-band), 700--850 (\emph{i}-band),
+850--1000 (\emph{z}-band), 970--1020 (\emph{Y}-band), 1040--1440
+(\emph{J}-band). Note that initial 
+investigations show that the \emph{H} and
+\emph{K}$_s$ SNRMAX is insufficient for SN science, and so only
+a \emph{grizYJ} light curve is shown.}
+\label{fig:des_video_simlc}
+\end{figure}
+\twocolumn
+
+\section{Dark energy constraints from different survey Strategies}\label{sec:cosmo}
+In this section, we present a forecast of the constraints on cosmological parameters from the 
+DES SN search using our simulations of the different survey strategies summarized in 
+Tab.~\ref{tab:strat} (with the exception of the ultra-deep strategy, which is not considered here). 
+In order to be included in the analysis in this section, each SN is required to pass the selection
+criteria listed in Tab.~\ref{tab:cuts}. In order to ensure an accurate spectroscopic host galaxy redshift
+determination, SNe with faint hosts ($m_i<24)$ are discarded. A multi-color light curve fit for each SN
+in the sample is made using the \mlcs\ model with the prior listed in Eqn.~\ref{eqn:prior}, 
+as described in $\S$\ref{sec:specz_anal}. In this section, we also include results using the \salt\
+model for comparison. A SNIa fit probability cut of 0.1 ($f_p>0.1$) is made to reject SNcc, as described in
+$\S$\ref{sec:misid}. We make the forecasts in the context of the CPL parametrization 
+\citep{che01,lin03} of the dark energy equation of state, $w(a) = w_0 + (1-a)w_a$.
+The cosmological parameters relevant for SN observations that we included are 
+$\Omega_{DE},w_0, w_a,\Omega_k$, which are the dark energy density, 
+the dark energy equation of state parameters, and the spatial curvature parameter. 
+A typical binned Hubble diagram for DES SNe, from the 10-field hybrid survey,  is shown 
+in Fig.~\ref{fig:hubble_diag1}.  The line represents the flat $\Lambda CDM$ 
+cosmology calculation used in the simulation (as described in $\S$\ref{sec:sim}).
+The RMS scatter for the binned DES SNe, as well as RMS/$\sqrt{N}$, 
+is shown in Tab.~\ref{tab:hubresid}. The small drop in RMS for 
+redshifts beyond z=1.0 was discussed in $\S$\ref{sec:specz_anal}. Table.~\ref{tab:hubresid}
+completes the picture by showing that RMS/$\sqrt(N)$ continues to increase at the highest
+redshift, as expected.
+Figure~\ref{fig:hubble_diag2} is another version of 
+the Hubble diagram, this time with individual SNIa and SNcc for 
+the hybrid 10-field survey.  The Hubble diagrams for the 
+hybrid 5-field survey are very similar to the 10-field figures.
+These figures 
+will be discussed further in $\S$\ref{sec:sysunc}.
+
+\begin{table}[ht]
+\centering%
+\begin{tabular}
+[c]{|c|c|c|}\hline
+Redshift & RMS & RMS/$\sqrt{N}$\\
+\hline
+0.0-0.1 & 0.17 & 0.0350 \\
+0.1-0.2 & 0.15 & 0.0140 \\
+0.2-0.3 & 0.14 & 0.0082 \\
+0.3-0.4 & 0.16 & 0.0073 \\
+0.4-0.5 & 0.17 & 0.0068 \\
+0.5-0.6 & 0.18 & 0.0075 \\
+0.6-0.7 & 0.18 & 0.0086 \\
+0.7-0.8 & 0.21 & 0.0120 \\
+0.8-0.9 & 0.23 & 0.0150 \\
+0.9-1.0 & 0.25 & 0.0180 \\
+1.0-1.1 & 0.21 & 0.0200 \\
+1.1-1.2 & 0.17 & 0.0240 \\
+\hline
+\end{tabular}
+\caption{The Hubble diagram RMS scatter, and RMS/$\sqrt{N}$, for the 
+simulated DES hybrid 10-field survey.}
+\label{tab:hubresid}%
+\end{table}
+
+The DES SN sample will provide the most precise cosmological constraints 
+when combined with low-redshift SN samples.  We include in our forecasts a simulation
+of the 3-year SDSS sample, as well as a projected data point representing 300 SNe
+below redshift z=0.1. For each low-redshift sample, we assume a 0.01 systematic 
+uncertainty in the absolute SNIa brightness (see Appendix \ref{apdx:fom}). 
+
+\subsection{Figure of Merit}\label{sec:fom}
+Constraints on cosmological parameters are
+obtained by comparing the theoretical values of distance moduli,
+$\mu(z,\theta_c)$, to the values inferred from the light
+curve fits of the SN simulations, $\mu_{fit}(z)$, where:
+$\theta_{c} \equiv \{\Omega_{DE},w_0, w_a,\Omega_k\}$ is the set of
+cosmological parameters.
+The likelihood for an individual
+SN at redshift z$_i$, $L(\mu_{fit} \vert z_i, \theta_c)$, is taken to be
+Gaussian with a mean given by the $\mu(z_i,\theta_c)$ at redshift z$_i,$
+for the cosmological parameters $\theta_c$, with a standard deviation $\sigma^\mu_i$ 
+given by the \mlcs\
+light curve fit errors and an intrinsic
+dispersion $\sigma_{int}=0.13$ added in quadrature. In the case of SNe
+ with photometrically determined redshifts, we add an error of
+$\vert\frac{\partial \mu(z,\theta_c)}{\partial z}\delta z\vert$ in quadrature.
+The simulated SN observations are independent, and the likelihood is analytically 
+marginalized over the nuisance parameter combination of the Hubble
+Constant, $H_0$, and the absolute magnitude, $M$, with a flat prior.
+This results in a likelihood for the $\mu_{obs}(z)$ for all SNe
+that is Gaussian and has a covariance matrix $Cov$, which can be
+calculated from the above errors $\sigma^\mu_i$ on each SN discussed
+above.
+
+Following the Dark Energy Task Force (DETF) Report \citep{alb06},
+we evaluated the
+performance of survey options in terms of the DETF Figure of Merit (FoM).
+The FoM is proportional to the inverse of the area of the 95\% CL
+error ellipse in the $w_0,w_a$ plane.
+The FoM is more precisely taken to be
+$1/\sqrt{det(C_{w_0,w_a})},$ where $C_{w_0,w_a}$ is the error
+covariance of $w_0,w_a$ marginalized over all other parameters,
+and is a measure of the size of the joint constraints on the dark
+energy parameters. Along with DES SNe, and the low-redshift samples 
+discussed above, we used
+prior constraints from the DETF Stage II experiments plus Planck in the form a Fisher Matrix for these
+experiments obtained from the DETF (Wayne Hu, private communication). Henceforth, 
+we refer to this prior as ``Stage II.''
+The error covariance matrix $C$ on all the parameters
+is estimated as the inverse of the Fisher matrix $F$ evaluated at a
+fiducial set of parameters $\Theta_p$ (which is chosen to be the set
+suggested by DETF, i.e., $\Omega_{DE}= 0.73, \Omega_K = 0, w_0=-1, w_a =0$):
+\begin{eqnarray}
+F_{ij} (\Theta_p ) &\equiv&  F_{ij}^{DES} +F_{Stage\;II}\nonumber\\
+F_{ij}^{DES}(\Theta_p) &\equiv& \left\langle -\partial_i \partial_j 
+\ln(L^{DES}(\mu_{obs}\vert\theta_c)\bigg\vert_{\Theta_p} \right\rangle\nonumber\\ 
+                & = & \frac{\partial \mu^{a}}{\partial 
+\Theta_c^{i}}Cov^{-1}_{ab}\frac{\partial \mu^{b}}{\partial \Theta_c^{j}}\bigg\vert_{\Theta_p} +\nonumber\\
+&&\frac{\partial^2\ln(\rm{det} (Cov))}{2\partial \Theta_i\partial\Theta_j}\bigg\vert_{\Theta_p},
+\label{eqn:fisher}
+\end{eqnarray}
+where $a,b$ index each SN and $i,j$ index the four cosmological parameters.
+The calculated DETF FoM, assuming spectroscopic host-galaxy redshifts and 
+statistical uncertainties only\footnote{As explained in 
+Appendix~\ref{apdx:fom}, the calculation includes marginalization 
+over the absolute magnitude.},
+ranges from 214 to 228 (see Tab.~\ref{tab:fomstat}).  
+The Stage II experiments plus Planck, without any additional data, yield 
+a FoM of 58. Hence, with statistical uncertainties only, the relative 
+improvement is by a factor of 3.69 to 3.93. 
+In our FoM estimates, we include a reduction in the SN sample 
+size due to incompleteness in the sample of host galaxies based on the fractions in Tab.~\ref{tab:galfrac}.
+The FoM before trimming is typically a factor of 1.07 larger.
+Augmenting the sample with photometric redshifts,  
+described in $\S$\ref{sec:dimhosts}, results in an 
+increase in relative FoM by a factor of 1.03.
+The hybrid 5-field is presented for both \mlcs\ and \salt\ 
+simulations and analyses. The difference in FoM between the two is 
+due to the smaller Hubble residuals for the \mlcs\ model 
+with a dust extinction prior (as shown in Fig.~\ref{fig:Dmu}). 
+In the next section, we augment our FoM calculations via the inclusion of systematic
+uncertainties, both with and without the effect of the dust prior.  
+
+\begin{table}[ht]
+\centering%
+\begin{tabular}
+[c]{|l|c|}\hline
+DES SNIa Data Set & DETF FoM (Stats.)\\
+\hline
+Hybrid 10-field & 228\\
+Hybrid 5-field  & 225 \\
+Hybrid 5-field (\salt) & 200 \\
+Shallow 9-field & 218\\
+Deep 3-field & 214 \\
+\hline
+\end{tabular}
+\caption{DETF Figure of Merit for four of the 
+DES SN survey strategies considered (see Tab.~\ref{tab:strat}) using statistical
+uncertainties only. The results are for the \mlcs\ model unless otherwise noted,
+and include the assumed DETF Stage II plus Planck combined Fisher matrix.
+SN statistics are given in the 
+Fig.~\ref{fig:nsn_4surveys} caption. 
+Each survey is augmented by a projected low-redshift SNIa anchor and a simulated 
+3-year SDSS SNIa data set. The number of SNIa in 
+each survey is also reduced due to host galaxy sample incompleteness 
+based on the fractions in table~\ref{tab:galfrac}.
+The Figure of Merit before trimming is typically 15 units 
+larger.}
+\label{tab:fomstat}%
+\end{table}
+
+\onecolumn
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=120mm]{hubble_10fields_diag_noinset_1.eps}}
+\caption{Hubble diagram of binned SNIa for the hybrid 10-field survey. Note that the scale of the 
+errors on the points is not visible. The RMS and RMS$/\sqrt{N}$ values for each redshift bin are 
+shown in Tab.~\ref{tab:hubresid}.}
+\label{fig:hubble_diag1}
+\end{figure}
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=120mm]{hubble_10fields_diag2.eps}}
+\caption{Hubble diagram of individual SNIa and SNcc for the hybrid 10-field survey.}
+\label{fig:hubble_diag2}
+\end{figure}
+\twocolumn
+
+\subsection{Systematic uncertainties}\label{sec:sysunc}
+The DES SN search precision will depend strongly on our
+ability to control 
+systematic uncertainties. In this section, we discuss the
+inclusion of such uncertainties in our FoM forecasts 
+(the details of the calculation are given in Appendix~\ref{apdx:fom}). 
+Unless specified, the numbers in this section assume an accurate redshift
+derived from a host-galaxy spectrum.  
+We consider three other fundamental sources of systematic uncertainties 
+and one tied to an analysis option in this paper: 
+\begin{itemize}
+\item filter zeropoints (fundamental);
+\item filter centroid wavelength shifts (fundamental);
+\item core collapse SNe in the SNIa sample (fundamental); 
+\item the use of a dust prior for \rv\ and \av\ (derived from 
+an analysis choice). 
+\end{itemize} 
+In addition, all of the calculations in this section include 
+the inter-calibration of the low-redshift anchor data sets and DES.
+We acknowledge the existence of astrophysical systematic effects that 
+are not included here. Such effects are community-wide concerns and are beyond
+the scope of this study.  
+
+The filter zeropoint uncertainties are taken as independent and 
+to have the value of 0.01 magnitudes (mags), which is an estimate 
+of the final survey precision. 
+The shift in the distance modulus is computed for each filter 
+zeropoint change.  The effect of a change in the \textit{i}-band 
+filter, and the corresponding change in $\mu$, 
+is displayed in Fig.~\ref{fig:sysfit_i}.
+Two sets of data points are shown,  one for a 0.01 mag 
+shift in \textit{i}-band, and the other a 0.1 mag shift but with 
+the $\mu$ change divided by 10.  This demonstrates the 
+linearity in the $\mu$ change for a shift in zeropoint.
+A Markov Chain Monte Carlo cosmology calculation\footnote{SNCOSMO 
+is available as part of the \snana\ package.},  with four independent
+cosmology parameters, was used to evaluate the shift in 
+the maximum likelihood value of $w_0$ due to a shift in filter zeropoint (see Fig.~\ref{fig:zpt_shifts}).  
+These cosmology shifts are meant as an example and are not used in 
+the FoM calculation described earlier and in Appendix~\ref{apdx:fom}.  
+The FoM including the $\mu$ changes caused by filter 
+zeropoint shifts, as illustrated in Fig.~\ref{fig:sysfit_i}, is 
+shown in Tab.~\ref{tab:fomsys} for the hybrid 10-field survey.
+This is the
+most important of the fundamental systematic uncertainties listed above.
+
+The systematic effects have also been evaluated for the hybrid 5-field survey, 
+and the impact on the FoM was found to be very similar to that for the 10-field survey. 
+Thus, from the point of view of constraining the CPL parameters, after combining with prior 
+data, the two strategies are essentially equivalent. The strategy choice is then 
+motivated by the potential for other kinds of studies that can, e.g., test and 
+verify the accuracy of SNIa light curve models and of the redshift
+independence of SNIa standardized luminosities. Such studies typically require 
+a large sample size, so that one can study correlations with other observables, 
+e.g., SNIa host properties. The 10-field survey provides a much larger number 
+of well-measured SNIa at redshift ranges where the potential for observing 
+host properties, or obtaining SNIa spectra, is high. Thus, the 10-field 
+hybrid strategy is more suitable for such studies.
+%
+%The systematic changes have also been evaluated for the 
+%hybrid 5-field survey, and were found to be very similar to the 10-field survey. 
+%This is a strong motivation for the 10-field over the 5-field hybrid survey, 
+%since the statistics-only FoM is also nearly the same for the two 
+%(recall Tab.~\ref{tab:fomstat}).
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|}\hline
+Systematic & FoM \\
+change & with\\
+included & systematic\\
+\hline
+None & 228 \\
+Filter zeropoint shift & 157 \\
+Inter-calibration & 188\\
+Filter $\lambda$ shift & 179 \\
+Core collapse misid. & 226 \\
+\rv\ and \tauav\  & 128 \\
+\hline
+Total without \rv\ and \tauav\ & 124 \\
+\hline
+Total with \rv\ and \tauav\ & 101\\
+\hline
+\end{tabular}
+\caption{\mlcs\ DETF FoM including various systematic changes in the
+DES SNIa hybrid 10-field survey (including a low-redshift anchor and a simulated 
+SDSS sample). The 5-field hybrid total values without and with \rv\ and \tauav\ 
+are 120 and 94, respectively.
+}
+\label{tab:fomsys}%
+\end{table}
+
+The systematic uncertainties in the filter centroids are derived 
+in a similar fashion to the zeropoints,  using 10 angstroms
+as the expected wavelength precision for the DES.  The resulting 
+FoMs are also presented in Tab.~\ref{tab:fomsys}.
+
+The systematic uncertainty due to SNcc misidentification 
+is caused by the fitted-$\mu$ difference between SNIa and SNcc (see Fig.~\ref{fig:hubble_diag2}).
+SNcc are generally dimmer than SNIa, and, in a fit for SNIa parameters, this 
+causes a shift in $\mu$ to larger values.  In this analysis,  the
+fraction of SNcc in the SNIa samples is small, typically $<$5\%.  
+The resulting small average $\mu$ shift, and the fact that the SNcc that pass
+selection cuts are all at low redshift where the low-redshift anchor suppresses their effect, 
+causes a relatively small decrease in FoM (see Tab.~\ref{tab:fomsys}).  
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{sysfit_i.eps}}
+\caption{Example shift in the average distance modulus, binned in redshift, 
+for a 0.01 magnitude error in the \textit{i}-band filter zeropoint 
+assuming the DES 5-field hybrid strategy. The black line is a polynomial 
+fit to the triangles. 
+Also shown are the 
+shifts (divided by 10) for a 0.1 magnitude error, demonstrating 
+linearity in the $\mu$ change. 
+The shift in the
+10-field survey is very similar to this.}
+\label{fig:sysfit_i}
+\end{figure}
+
+The final systematic uncertainty considered is the use 
+of an incorrect dust extinction prior in the SNIa fitting procedure. 
+Fig.~\ref{fig:Dmu} showed that the use of the prior 
+in the \mlcs\ fit improved the RMS scatter of the Hubble diagram, 
+compared to the \salt\ fit which had no prior.  However, the
+trade off is an additional systematic uncertainty since 
+an incorrect prior in the fit can bias the distance modulus.
+The uncertainty in \rv\ and \tauav\ is derived from the 
+analysis of one SNIa color presented in $\S$\ref{sec:avrv} and
+in Fig.~\ref{fig:avrv2}. Values of \rv\ within $\sim$0.38 of
+the SDSS reference value,  and \tauav\ within $\sim$0.06 of the
+SDSS reference value, were used to derive the FoM.  
+The resulting effect on the FoM is actually more significant than
+that of the fundamental systematics (see Tab.~\ref{tab:fomsys}). 
+These uncertainties can be improved by using all the color information 
+available; on the other hand, they ignore possible redshift dependence.
+Our analysis indicates that the effect of the current
+dust prior systematic is much larger than the effect of 
+increased Hubble residuals in the \salt\ analysis 
+FoM (see Tab.~\ref{tab:fomstat}).
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{zpt_shifts.eps}}
+\caption{Example shifts in $w_0$ for systematic changes in 
+filter zeropoints assuming the DES 5-field hybrid strategy.}
+\label{fig:zpt_shifts}
+\end{figure}
+
+The total FoM, including our current estimates of 
+systematic uncertainties, is shown in 
+Tab.~\ref{tab:fomsys}, for the 
+cases both with and without the dust prior.  The 95\% CL limits 
+on $w_0$ and $w_a$ are displayed in Fig.~\ref{fig:ellipse}, 
+for statistical uncertainties and including all systematic uncertainties.
+Fig.~\ref{fig:werr} displays the total 95\% CL limits on 
+$w$ as a function of redshift, and includes curves for
+the DETF Stage II prior alone.  
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{ellipse_only_10fields.eps}}
+\caption{Projected 95\% limits on $w_0$ and $w_a$ as a function of redshift, with and 
+without systematic uncertainties, assuming the DES 10-field hybrid strategy. These 
+constraints are marginalized over $\Omega_{DE}$, $\Omega_k$, and, in the systematics 
+case, the systematics nuisance parameters. 
+The corresponding figure for the 5-field survey is very similar. 
+}
+\label{fig:ellipse}
+\end{figure}
+
+Overall, the DES SNIa sample,  augmented by a low-redshift anchor set, 
+is expected to constrain a time-dependent parametrization of 
+$w$,  and improve the DETF FoM by at least a factor of 1.75 over the 
+Stage II value of 58.  
+
+\begin{figure}[ht]
+\centerline{\includegraphics[angle=0,width=75mm]{werr_10fields.eps}}
+\caption{Projected 95\% limits on {\it w}($a$) as a function of redshift, with and 
+without systematic uncertainties, assuming the DES 10-field hybrid strategy. 
+Also shown is the DETF Stage II prior by itself.
+The corresponding figure for the 5-field survey is very similar.}
+\label{fig:werr}
+\end{figure}
+
+
+\section{Discussion and summary}\label{sec:discuss}
+We have presented an analysis of supernova light curves simulated for the 
+upcoming Dark Energy Survey (DES) using the
+public \snana\ package \citep{snana}. 
+The DES collaboration expects first light to occur in 2012. We have discussed, in detail, 
+a prescription for the %broad optimization 
+selection of a supernova search strategy prior to the 
+onset of survey operations. We have taken several facets of observational supernova 
+methodology into consideration, e.g., filter selection, observing field selection, 
+cadence, exposure time, bias mitigation, sample purification, and spectroscopic 
+and photometric redshift determination. In our analysis, we have additionally 
+included the effects of the DES site weather history, relative position of the Moon, 
+and observing gaps introduced by community use of the DES Dark Energy Camera. 
+We showed that the choice of the \mlcs\ or \salt\ supernova light curve model impacted
+our simulation results as follows. \salt\ simulations exhibited significantly
+less high-redshift bias in the distance modulus residuals than did those based on 
+\mlcs\ with a flat prior. However, under the assumption of the application of the 
+correct \mlcs\ prior, the use of \salt\ resulted in a $\sim$10\% reduction in the
+statistics-only DETF 
+Figure of Merit due to a 50\%--100\% increase in the RMS scatter of the 
+high-redshift distance modulus residuals.   
+
+We forecast that the DES will discover up to $\sim$4000 well-measured Type Ia 
+supernovae out to a redshift of up to 1.2, with four-pass-band  photometry up
+to a redshift of z$\sim$0.7--0.8. Spectroscopic redshift determination
+from a maximally complete host galaxy follow-up program is planned. 
+Based on our detailed simulations, we have determined that, prior to the completion of the 
+follow-up campaign, DES photometric redshifts will be sufficient for determining
+interim cosmological constraints. In addition, our projection of the ability of
+DES to distinguish non-Type Ia supernovae within the larger sample will lead to
+a Type Ia sample purity of 98\% for a Type Ia fit probability 
+cut of 0.1 assuming the 10-field hybrid survey strategy (see Tab.~\ref{tab:strat}). 
+
+We have further presented two initial studies of DES supernova colors and dust extinction, 
+as follows. First, we harnessed \snana\ to explore the DES sensitivity to the \mlcs\ 
+model parameters \av\ and \rv\ based on an analysis of supernova color variations 
+for a grid of \rv\ and \tauav. We found, for example, that the difference between the 
+bluest and reddest
+filter magnitudes varies on the order of a few tenths over the commonly accepted \rv\ range 
+of 1.1 to 3.1. Second, we discussed the planned overlap of the DES supernova search with that
+of the VIDEO Survey. In order to evaluate this opportunity to obtain a combined
+optical+infrared supernova sample, we extended the capability of \snana\ to simulate and 
+fit near-infrared light curves. We found that the DES and VIDEO Survey supernova
+searches will yield on the order of 100 joint light curves over the anticipated two years
+of operational overlap.
+
+During the course of our DES %optimization 
+supernova strategy study, we considered a range of filter choices 
+and survey areas. We considered use of the DES \textit{Y} filter for the 
+supernova search, and found that it came at too high of a cost in terms of exposure time.
+This fact, coupled with the expected \textit{YJ} coverage from the VIDEO Survey,
+ultimately led us to settle on a \textit{griz} DES supernova search. We have evaluated a 
+suite of possible supernova survey areas from 1 to 10 DES fields 
+(3--30 deg$^2$). This suite included a range of survey depths, within the constraint
+of the total supernova exposure time allocated within the larger DES, from narrow and deep, 
+to wide and shallow, and a hybrid approach with both deep and shallow fields. For the 
+shallow and 5-field hybrid strategy, a shallow field is defined to be one 
+with one third of the exposure time of a deep field. Note that the depth is determined by 
+the exposure time, as all DES supernova fields have the same 3 deg$^2$ area.
+Broadly speaking, the trade off between the deep and shallow strategies
+can be summarized in terms of the high photon statistics and redshift depth of deeper 
+strategies and the overall number of supernovae measured for a shallow strategy. In addition,
+we found that deep surveys, as expected, are less susceptible to supernova selection biases 
+than are wide surveys. In order to take advantage of the benefits of both types of survey,
+we have identified that a hybrid survey is %the optimal 
+a good choice for the DES.
+
+We further dissected our supernova survey choice into the specifics of the hybrid strategy
+to pursue. The hybrid strategy initially considered calls for 5 fields: 2 deep field and 3 shallow
+fields. 
+While this strategy offers clear benefits over the 9-field, shallow-only option considered, 
+the question arose of how many shallow fields %is optimal in 
+the hybrid should have.
+%context. 
+In addressing this question for the DES, we found that covering more area increases the 
+number of supernovae faster than increasing the exposure time, and that the DETF FoM should be 
+maximized by having the sample contain the maximum number of supernovae at the 
+lowest possible redshift. These two points argue for a larger number of shallow fields.
+A counter to this argument arises from the fact the total amount of time allocated to the
+DES supernova search is fixed. This means that, for every additional shallow field, on average 
+there is less exposure time available for each shallow field. 
+
+Our analysis motivates
+that having 8 shallow fields (created by dividing 1 deep field into the shallow fields with 1/8 
+of the exposure time) offers an attractive balance of these considerations, resulting in a
+10-field hybrid strategy. Quantitatively, we have found that while the 5- and 10-field hybrid strategies 
+yield similar DETF Figure of Merits, the primary advantages of 
+the 10-field hybrid, as compared to the 5-field hybrid, are an increase in supernova statistics, 
+mostly at medium DES supernova redshifts, by greater than 1/3, and a $\sim$75\% decrease in non-Ia 
+supernovae passing selection cuts.
+The first advantage of the 10-field hybrid is of key importance because supernovae at redshifts between 
+z=0.4 and z=0.8 could form a DES supernova ``calibration'' sample. Our goal with this sample 
+is to simultaneously obtain high quality follow-up spectroscopic data for both the 
+supernovae and host galaxies. We target this redshift range for high supernova statistics because it offers 
+an increase in redshift coverage relative to SDSS and improved \textit{z}-band coverage 
+compared to SNLS, thereby enhancing the competitiveness of the DES supernova sample for 
+follow-up with leading, 8-meter-class telescopes. While pushing the DES supernova coverage to high
+redshift is attractive, it is expensive in terms of 8-meter-class telescope time. Such expense is
+not easily justified given the relatively low DES supernova signal-to-noise at high redshifts.
+
+In closing, we forecast that the Dark Energy Survey supernova search will yield as many as 4000 
+well-measured Type Ia supernovae out to a redshift as high as 1.2, with a sample purity of up to 98\%. This 
+sample will be the largest cohesive set of Type Ia supernova photometric data to date. Based on the results of the analysis in this paper, we project that the 
+Dark Energy Survey supernova search will attain DETF Stage III status \citep{alb06} by improving 
+the DETF Figure of Merit by a factor of at least 1.75 relative to DETF Stage II experiments.
+ 
+\acknowledgments
+
+We thank John Cunningham of the Loyola University Chicago Department of Physics for his assistance with the completion of the simulations that form the foundation of this paper. In addition, we thank Delphine Hardin for supplying the SNLS information included in Tab.~\ref{tab:galfraction-evol}.
+
+The submitted manuscript has been created by UChicago Argonne, LLC, 
+Operator of Argonne National Laboratory (``Argonne''). Argonne, a 
+U.S. Department of Energy Office of Science laboratory, is operated under 
+Contract No. DE-AC02-06CH11357. The U.S. Government retains for itself, 
+and others acting on its behalf, a paid-up nonexclusive, irrevocable 
+worldwide license in said article to reproduce, prepare derivative 
+works, distribute copies to the public, and perform publicly and 
+display publicly, by or on behalf of the Government.
+
+This paper has gone through internal review by the DES collaboration. 
+Funding for the DES Projects has been provided by the U.S. Department of Energy, the U.S. National Science Foundation, the Ministry of Science and Education of Spain, the Science and Technology Facilities Council of the United Kingdom, the Higher Education Funding Council for England, the National Center for Supercomputing Applications at the University of Illinois at Urbana-Champaign, the Kavli Institute of Cosmological Physics at the University of Chicago, 
+Financiadora de Estudos e Projetos, Funda\c{c}\~{a}o Carlos Chagas Filho de Amparo \`{a} Pesquisa do Estado do Rio de Janeiro, Conselho Nacional de Desenvolvimento Cient\'{i}fico e Tecnol\'{o}gico and the Minist\'{e}rio da Ci\^{e}ncia e Tecnologia, the Deutsche Forschungsgemeinschaft and the Collaborating Institutions in the Dark Energy Survey.
+
+The Collaborating Institutions are Argonne National Laboratories, the University of California at Santa Cruz, the University of Cambridge, Centro de Investigaciones Energeticas, Medioambientales y Tecnologicas-Madrid, the University of Chicago, University College London, DES-Brazil, Fermilab, the University of Edinburgh, the University of Illinois at Urbana-Champaign, the Institut de Ciencies de l'Espai (IEEC/CSIC), the Institut de Fisica d'Altes Energies, the Lawrence Berkeley National Laboratory, the Ludwig-Maximilians Universität and the associated Excellence Cluster Universe, the University of Michigan, the National Optical Astronomy Observatory, the University of Nottingham, the Ohio State University, the University of Pennsylvania, the University of Portsmouth, SLAC, Stanford University, the University of Sussex, and Texas A\&M University.
+
+\appendix\label{apdx}
+\section{Fractions of SNIa Host Galaxies Satisfying Apparent-Magnitude Limits}\label{apdx:hosts}
+In order to determine the spectroscopic follow-up requirements for the
+DES SN search, it is necessary to know, as a function of redshift, the
+numbers of SNIa host galaxies that satisfy the $i$-band
+apparent-magnitude limits discussed in $\S$\ref{sec:redshift}.  
+In general, it is useful to quote
+the fractions of SNIa host galaxies in a given redshift interval that
+fall into the various classes. For any given survey, these
+fractions can then be combined with the expected redshift distribution
+of SNIa to obtain, for each redshift interval, the expected number of
+SNe that will require spectroscopic follow-up. The galaxy fractions
+are calculated from the luminosity distributions of SNIa host
+galaxies. These luminosity distributions can be estimated by weighting
+the luminosity distributions of field galaxies by the probability that
+a galaxy will host a SNIa. We assume that the luminosity of a host
+galaxy scales with its stellar mass, we make the ansatz that this probability
+is proportional to the host-galaxy stellar-mass dependence of the
+measured rate of SNIa.
+
+We have made a number of simplifying assumptions in the calculation
+presented here. First, we have assumed the presence of sharp cut-offs
+in the apparent-magnitude limits that determine whether or not a
+galaxy will have a measured follow-up spectrum or a photo-$z$
+estimate. In reality, this will not be the case. Due to various
+inefficiencies, spectra will not be obtained for all galaxies with
+$m_i<24$. For example, the DEEP2 survey \citep{fab07} quote an overall
+efficiency for obtaining follow-up spectra of about 70\%. On the other
+hand, spectra will be obtained for some galaxies that are dimmer than
+$m_i$=24, but have strong emission lines.  
+We did not include the misidentification of a SN host galaxy, both
+because it is small \cite[][find this to be a 2\% effect at 
+low redshift]{smi11}, and because our analysis is rather insensitive to this 
+effect. The latter point is
+due to the precision of DES photometric redshifts, which is of 
+particular importance at high redshifts where host identification 
+uncertainties are the largest. 
+A second assumption in our calculation is that
+we can ignore variations in the surface-brightness of galaxies and
+that the parameters that we use to characterize the behavior of the
+luminosity functions are free from surface-brightness selection
+effects. Third, in determining the probability that a galaxy can host
+a SNIa, we assume that we can ignore the star-formation rate. Instead,
+we assume that we can derive a probability based solely on the
+stellar-mass dependence of the SNIa rate. This assumption introduces
+uncertainties which we estimate by choosing a range in the mass
+dependence that covers the measured values for star-forming and
+passive galaxies.  
+Finally, we make some simplifying assumptions in the treatment of K-corrections. 
+For galaxies with measured follow-up spectra, the K-corrections are irrelevant, since the entire
+spectrum will be measured. The apparent-magnitude limits that we are using to estimate the fractions
+are simply a convenient way to quantify the capabilities of the telescopes that are used to obtain 
+the follow-up spectra. However, for a host galaxy with a
+photometrically determined redshift, K-corrections can significantly reduce its 
+$i$-band apparent magnitude, and hence can impact the precision of its measured photo-$z$.
+K-corrections vary significantly depending on the galaxy morphology, but typically become
+more important around a z of 0.7, where the 4000 $A^\circ$ break in the galaxy SED crosses
+into the $i$-band. 
+A full treatment of K-corrections is beyond the scope of this study.
+Below, we give some estimates of the effect for different galaxy types. These estimates are based 
+on the assumption that we can use
+a simple linear approximation to characterize the typical shape of the SED for each galaxy type.
+With these caveats in mind, we now present the details of our calculation.
+
+Field galaxies have luminosity density functions that are
+well described by Schechter functions of the form
+\begin{equation}
+  \phi(M)dM=0.4\log(10)\phi^{*}10^{0.4(M^{*}-M)(\alpha^{*}+1)}\exp(-10^{0.4(M^{*}-M)})dM,
+\label{eqn:gf-shechter}
+\end{equation}
+where $M$ is the absolute magnitude of the host galaxy in some filter, and 
+$\phi^{*}$, $M^{*}$, and $\alpha^{*}$ are experimentally measured parameters.
+These parameters are usually quoted for rest-frame filters. However, since we are interested in
+DES $i$-band magnitude limits, it is convenient to use
+the $i$-band Schechter-function parameters from \cite{bla03} because the wavelength range for
+the $i$-band filter in SDSS is very close to that for DES. 
+For now, we consider the case where the parameters
+are fixed. Below, we will address the case where they evolve with $z$.
+The dependence of the rate of SNIa on the host-galaxy stellar mass, $M_\star$,
+is usually parametrized as a power law of the form $M_\star^{\kappa_{Ia}}$. A summary of the 
+measured values of $\kappa_{Ia}$ for different host-galaxy types is given in Tab.~\ref{tab:rIavalues}.
+
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c|c|c|}\hline
+Reference & Host Galaxy Type & $\kappa_{Ia}$\\
+\hline
+\cite{sul06} & Passive & $1.10\pm 0.12$\\
+\cite{sul06} & Strongly Star Forming & $0.74\pm 0.08$\\
+\cite{sul06} & Weakly Star Forming & $0.66\pm 0.08$\\
+\cite{smi11}     & Passive & $0.67\pm 0.15$\\
+\cite{smi11}     & Star-Forming & $0.94\pm 0.08$\\
+\cite{li11-2}        & All & 0.5 \\
+\hline
+\end{tabular}
+\caption{References for the dependence of the SNIa rate on the host-galaxy stellar mass.}
+\label{tab:rIavalues}% 
+\end{table}
+
+The range of values in Tab.~\ref{tab:rIavalues} exceeds the quoted uncertainties. 
+Furthermore, \cite{smi11} and \cite{sul06} disagree on the trend in values for a given type of host galaxy.
+We choose therefore to take the lowest and highest values from Tab.~\ref{tab:rIavalues} 
+as the plausible range for the stellar-mass dependence of SNIa
+hosts, and present fractions corresponding to this range.
+Assuming that the luminosity is proportional to the stellar mass, we find that
+the luminosity density function for SNIa host galaxies is given by
+\begin{equation}
+  \phi_{Ia}(M)dM=0.4\log(10)\phi_{Ia}^{*}10^{0.4(M^{*}-M)(\alpha^{*}+\kappa_{Ia}+1)}\exp({-10^{0.4(M^{*}-M)}})dM,
+\label{eqn:gf-shechterIa}
+\end{equation}
+where $\phi_{Ia}^{*}$ is an (unknown) normalization constant that is assumed to be proportional to
+$\phi^{*}$, and $\kappa_{Ia}=0.5$ or $1.10$. 
+Eqn.~\ref{eqn:gf-shechterIa} predicts an absolute-magnitude distribution of SNIa host galaxies
+that is in qualitative agreement with the distribution measured by \cite{yas10}.
+
+The next step is to determine, in the presence of an apparent magnitude cut, $m_{lim}$,
+the number of SNIa host galaxies that will be seen in a thin shell at redshift $z$.
+All galaxies having absolute magnitudes brighter than $M = m_{lim}-\mu(z)-K(z)$ will be visible.
+Here, $\mu(z)$ is the distance modulus that is determined from the redshift assuming a particular cosmology, 
+and $K(z)$ is the K-correction that accounts for the redshift of the galaxy spectra. 
+Hence the fraction of visible galaxies is given by
+\begin{equation}
+ \frac{ \int^{m_{lim}-\mu(z)-K(z)}_{-\infty} \phi_{Ia}(M)dM} {\int^\infty_{-\infty}\phi_{Ia}(M)dM}.
+\label{eqn:gf-dfraca}
+\end{equation}
+We note that the normalization constant, $\phi_{Ia}^{*}$, in Eqn.~\ref{eqn:gf-shechterIa} cancels in this fraction.
+Furthermore, for the values of $\alpha^{*}$ that are 
+typically measured from field-galaxy data, the integrals in Eqn.~\ref{eqn:gf-dfraca} are convergent for large $M$ only 
+because of the extra terms in the integrands that are dependent on $\kappa_{Ia}$. 
+Integrating Eqn.~\ref{eqn:gf-dfraca} over $M$ and $z$ yields the fraction of visible galaxies in the range $z_{lo}<z<z_{hi}$. 
+\begin{equation}
+   f(z_{lo},z_{hi},m_{lim})= \frac{ \int_{z_{lo}}^{z_{hi}} \Gamma(\alpha^{*}+\kappa_{Ia}+1, 10^{0.4(M^{*}- m_{lim}-\mu(z)-K(z))})dV_{co}} {\Gamma(\alpha^{*}+\kappa_{Ia}+1) \int_{z_{lo}}^{z_{hi}} dV_{co}},
+\label{eqn:gf-dfracb}
+\end{equation}
+where $\Gamma(s,x)$ and $\Gamma(s)$ are the upper incomplete Gamma function and the Gamma function, respectively,
+and $ dV_{co}$ is the co-moving volume element. 
+
+Given a cosmology, Eqn.~\ref{eqn:gf-dfracb} can now be evaluated over any desired redshift range to give the 
+SNIa host fractions.  
+In Tab.~\ref{tab:galfraction}, we present these fractions for a $\Lambda$CDM cosmology with $\Omega_\Lambda=0.73$, 
+$\Omega_m=0.27$, $H_{\rm 0}$ = 72 km s$^{-1}$ Mpc$^{-1}$. We choose redshift intervals of
+0.1 and the limiting cases of $\kappa_{Ia}$=0.5 and $\kappa_{Ia}$=1.1. We set $K(z)=0$ for now.  
+Two regions of the host-galaxy i-band apparent magnitude,
+$m_i$, are considered:  $m_i<24$, $24<m_i<26$. These regions
+correspond to the current expectations for the apparent magnitude limits for which DES will be 
+able to obtain spectroscopic and photo-z host-galaxy redshifts, respectively. 
+SNIa whose host galaxies do not fall into either of these two classes will either have no visible hosts, or have
+hosts with large uncertainties in their photo-z redshifts.
+ 
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c||c|c||c|c|}\hline
+$z$-range & \multicolumn{2}{c||}{$\kappa_{Ia}=0.5$}  & \multicolumn{2}{c|}{$\kappa_{Ia}=1.10$} \\ \cline{2-5}
+          & $m_i<24$ & $24<m_i<26$ & $m_i<24$ & $24<m_i<26$  \\
+\hline
+0.1 -- 0.2 & 0.93 & 0.04 & 0.998 & 0.002   \\
+0.2 -- 0.3 & 0.89 & 0.07 & 0.994 & 0.005   \\
+0.3 -- 0.4 & 0.84 & 0.10 & 0.986 & 0.012  \\
+0.4 -- 0.5 & 0.78 & 0.13 & 0.975 & 0.022  \\
+0.5 -- 0.6 & 0.73 & 0.16 & 0.958 & 0.037  \\
+0.6 -- 0.7 & 0.67 & 0.19 & 0.935 & 0.056   \\
+0.7 -- 0.8 & 0.61 & 0.23 & 0.906 & 0.081   \\
+0.8 -- 0.9 & 0.55 & 0.26 & 0.87 & 0.11   \\
+0.9 -- 1.0 & 0.50 & 0.29 & 0.83 & 0.14   \\
+1.0 -- 1.1 & 0.44 & 0.32 & 0.78 & 0.18   \\
+1.1 -- 1.2 & 0.39 & 0.34 & 0.73 & 0.23  \\
+
+\hline
+\end{tabular}
+\caption{Fractions of the total number of SNIa host galaxies for various apparent magnitude limits and values of $\kappa_{Ia}$.}
+\label{tab:galfraction}% 
+\end{table}
+
+So far, we have assumed that the parameters characterizing the shape of the Schechter functions in 
+Eqns.~\ref{eqn:gf-shechter} and \ref{eqn:gf-shechterIa} do not vary with redshift. 
+In fact, current measurements indicate that the parameters $\phi^{*}$, $M^{*}$, and $\alpha^{*}$ all
+vary with $z$.\citep{bla03,fab07,li11-2,pol03}. 
+If the normalization, $\phi^{*}$ is dependent on $z$, it no longer cancels exactly in Eqn.~\ref{eqn:gf-dfracb}.
+However, we have checked that the change in the fractions is much less than 1\% for the values of 
+$\phi^{*}(z)$ that have been measured from existing data. Hence we can safely ignore any 
+changes in $\phi^{*}$. 
+Variations in $\alpha^{*}$ affect the shape of the Schechter function at large values of $M$. 
+Most studies have kept the value of $\alpha^{*}$ fixed.
+The limited data that are available for $\alpha^{*}$ evolution \citep{pol03} show a modest
+decrease in the value of alpha for $B$-band measurements. Since we do
+not have any $i$-band measurements of $\alpha^{*}$ evolution and, as
+can be seen from Eqn.~\ref{eqn:gf-dfracb}, changes in the value of
+$\kappa_{Ia}$ have the same effect as changes in $\alpha^{*}$, for the
+purposes of this analysis, we can ignore evolution in $\alpha^{*}$.
+Evolution of $M^{*}$ can be parametrized as
+$M^{*}(z)=M^{*}(z_0)-Q(z-z_0)$, where $z_0$ is some reference
+redshift.  This parametrization is very convenient because
+Eqn.~\ref{eqn:gf-dfracb} is still correct, once $M^{*}$ is replaced by
+$M^{*}(z)$.  The measured values of $Q$ are filter dependent, have
+large uncertainties and show a substantial variation with galaxy
+type. \cite{lin99}, in the CNOC2 survey, found that Early-type
+galaxies have larger, positive values of $Q$ of $O(1-2)$, whereas
+Late-type galaxies have smaller values of $Q$ less than 0.5.  Note
+that since $Q$ is positive, galaxies get brighter as $z$ gets larger,
+so ignoring the effects of evolution will lead to overestimates of the
+number of galaxies that would fail any apparent magnitude cut.
+\cite{bla03}, in the SDSS survey, use a more complicated
+parametrization for the evolution of the galaxy luminosity-density
+functions.  However, their parametrization is reasonably well
+approximated by a simpler Schechter-function parametrization at their
+reference redshift of $z_0$=0.1.  Since we assume that this will also
+be the case at higher redshifts, we can still use the value of 1.6 that they
+fit for their $Q$-parameter as an estimate for the $Q$-value in our
+linear-evolution case.  We therefore show the effects of $z$-evolution
+on the SNIa host-galaxy fractions by choosing values of $Q$ equal to
+0, 0.5 and 1.6, which are representative of the range of values
+present in the data.  In Table~\ref{tab:galfraction-evol}, we present
+the fractions for these three values of $Q$ and $\kappa_{Ia}=0.74$.
+Following \cite{bla03}, we choose $z_0=0.1$.
+  
+\begin{table}[h]
+\centering%
+\begin{tabular}
+[c]{|c||c|c||c|c||c|c|}\hline
+$z$-range & \multicolumn{2}{c||}{$Q=0$} & \multicolumn{2}{c||}{$Q=0.5$}  & \multicolumn{2}{c|}{$Q=1.6$} \\ \cline{2-7}
+          & $m_i<24$ & $24<m_i<26$ & $m_i<24$ & $24<m_i<26$ & $m_i<24$ & $24<m_i<26$ \\
+\hline
+0.1 -- 0.2 & 0.98  & 0.01   & 0.98  & 0.01  & 0.99  & 0.01   \\
+0.2 -- 0.3 & 0.96  & 0.03   & 0.97  & 0.03  & 0.97  & 0.02   \\
+0.3 -- 0.4 & 0.94  & 0.05  & 0.94  & 0.04  & 0.95  & 0.04  \\
+0.4 -- 0.5 & 0.91  & 0.07  & 0.92  & 0.06  & 0.94  & 0.05  \\
+0.5 -- 0.6 & 0.87  & 0.10  & 0.89  & 0.09  & 0.92  & 0.06  \\
+0.6 -- 0.7 & 0.82  & 0.13  & 0.85  & 0.11  & 0.90  & 0.07   \\
+0.7 -- 0.8 & 0.77  & 0.17  & 0.82  & 0.14  & 0.89  & 0.09   \\
+0.8 -- 0.9 & 0.72  & 0.20  & 0.78  & 0.16   & 0.87  & 0.10  \\
+0.9 -- 1.0 & 0.67 & 0.24  & 0.74  & 0.19   & 0.86  & 0.10  \\
+1.0 -- 1.1 & 0.61 & 0.28 & 0.70 & 0.22  & 0.85  & 0.11  \\
+1.1 -- 1.2 & 0.55 & 0.32  & 0.67 & 0.24  & 0.84  & 0.12  \\
+
+\hline
+\end{tabular}
+\caption{Fractions of the total number of SNIa host galaxies for various apparent magnitude limits for
+$\kappa_{Ia}=0.74$ and three values of $M^*$-evolution parameter, $Q$. 
+The chosen values of $Q$ span the range of possible values found in the field-galaxy data.}
+\label{tab:galfraction-evol}% 
+\end{table} 
+
+As mentioned above, K-corrections will reduce the $i$-band apparent magnitudes of host galaxies, 
+particularly those above a redshift of 0.7, which is where the 4000 $A^\circ$ break 
+crosses into the rest-frame $i$-band. 
+If we now include K-corrections in our estimates, the fractions with
+$m_i<24$ decrease, and the fractions with $24<m_i<26$ increase. 
+In general, because they have flatter SEDs, the size of the changes are larger for elliptical 
+galaxies than for star-forming galaxies. If we assume that the SED of a strongly star-forming galaxy rises linearly by a factor of 3
+from 8500  $A^\circ$ down to the 
+4000 $A^\circ$ break, and then falls by a factor of about 2 below the break, we find that the fractions for the middle column of
+Table~\ref{tab:galfraction-evol} change by less than a few percent below $z=0.7$. Above $z=0.7$, the effect increases with $z$,
+and results in a 16\% decrease in the  $m_i<24$ estimate and a 17\% increase in the $24<m_i<26$ estimate for $z$ between 1.1 and 1.2.
+On the other hand, if we assume that the SED of an elliptical galaxy is flat and falls by a factor of 2 below the 
+4000 $A^\circ$ break, we find that the effects are much larger. Even below $z=0.7$, the changes grow with $z$, up to a 10\% decrease
+in the  $m_i<24$ estimate and a 6\% increase in the $24<m_i<26$ estimate for $z$ between 0.6 and 0.7.
+Above $z=0.7$, the effect of the corrections again rises with $z$ and results in a 40\% decrease in the $m_i<24$ estimate and a 24\% increase 
+in the $24<m_i<26$ estimate for $z$ between 1.1 and 1.2. The effect of K-corrections on the galaxy fractions should lie somewhere
+between these two extremes, depending on the precise mix of SNIa host-galaxy morphologies. Hence, the size of this uncertainty 
+is comparable to the other uncertainties discussed in this section.
+Note, however, that these uncertainties affect only the estimates of the size of the photo-$z$ sample. We have seen in 
+$\S$\ref{sec:fom}, that the FOM decreases by only about 15 units, even if no SNe in the photo-$z$ sample are included.     
+Hence, adding some fraction of SNe from the photo-$z$ sample to the analysis can result in only very modest gains in the FOM, and 
+we expect that our forecasts for the FOM values to be largely unaffected by the uncertainties in the K-corrections.
+ 
+We conclude that uncertainties in the data that can be used to constrain the SNIa host-galaxy fractions
+are large and lead to big variations in the estimates of the number of host galaxies that fall into the various 
+magnitude classes. As discussed above, we have made several simplifying assumptions in our calculations that 
+ignore a number of known effects due to inefficiencies in redshift determinations, galaxy morphology,
+galaxy surface brightness and star-formation rate. We have attempted to include the effects due
+to $z$-evolution of the Schechter functions, but here too there are dependencies on galaxy morphology 
+that contribute to the uncertainties on the fractions. 
+We quote numbers in the mid-range of the predictions in the body of the paper, but note that
+predictions at high $z$ vary by about 25\%. 
+
+\section{SNe systematic uncertainties in the FoM calculation}\label{apdx:fom}
+The use of a Fisher Information Matrix in forecasting constraints from a 
+survey has been discussed in several works. While the general formalism 
+can account for certain kinds of systematic uncertainties 
+in the forecasted constraints, the specific examples for supernova 
+surveys that are usually studied only account for 
+statistical uncertainties. 
+The DETF report suggested accounting for systematic uncertainties in 
+forecasting cosmological constraints from supernova surveys. In 
+particular,  the DETF report discussed four kinds of systematic uncertainties: 
+1. photo-z errors, 2. absolute magnitude uncertainties, 3. step $\mu$ offset for the near sample, 
+4. quadratic $\mu$ offset (see subsection below for additional information). 
+With the advantage of our simulations and knowledge specific to the 
+setup of DES,  we extend the DETF analysis by choosing a more 
+appropriate set of systematics particularly with respect to their fourth 
+systematic parameter.
+In this appendix, we explain the choices made in our paper and how they 
+relate to the DETF choices.
+
+The basic idea is that the naive estimator for the distance modulus as 
+obtained from the light curve fitter is biased when the survey setup 
+and conditions or the  properties of SNIa are actually different 
+from those assumed in the analysis. However, since the survey conditions 
+can be varied in our simulation inputs, we can estimate the bias 
+$\Delta \mu(z, \Theta)$, 
+which is the expected deviation of the estimated distance modulus from the 
+true distance modulus, for each set of conditions. We thus correct for 
+the bias by replacing $\mu(z,\theta_c) \rightarrow \langle (\mu ,z \Theta)\rangle 
+= \mu(z,\theta_c) - \Delta \mu(z, \Theta),$ where $\Theta$ includes not only the 
+cosmological parameters, $\theta_c$, but also the set of systematic 
+parameters, $\theta_n$, modeling the setup and SN properties. These systematic parameters 
+are measured independently, and the information from 
+these measurements may be treated as a Gaussian prior resulting 
+in a prior Fisher matrix $F_{ind}.$  
+Extending the set of model parameters $\Theta$ to include these 
+systematic parameters $\theta_n$  as ``nuisance parameters", we can use the
+replacement in computing the Fisher matrix and then marginalize over 
+the allowed values of these nuisance parameters.  We give the expression for the Fisher matrix 
+\begin{eqnarray}
+F_{tot} &=& F_{ij} +F_{Stage\;II} + F_{ind},\nonumber\\
+F_{ij}(\Theta_p) &=& \frac{\partial{\langle \mu^a(z,\Theta)\rangle}}{\partial 
+\Theta_i} \bigg\vert_{\Theta_p}(Cov^{-1})_{ab}
+\frac{\partial{\langle\mu^b(z,\Theta)\rangle}}{\partial \Theta_j}\bigg\vert_{\Theta_p}
++\frac{1}{2}\frac{\partial^2\ln(\rm{det} (Cov))}{\partial \Theta_i\partial\Theta_j}
+\label{eqn:fisher-sch}
+\end{eqnarray}
+where $a,b$ index the SN and are summed over in the above equation, and $Cov$ is 
+the covariance matrix used in the (statistics only) Fisher matrix.
+The second term arises from the derivatives of the logarithm of the
+normalization of the Gaussian. The normalization of the Gaussian
+distribution only depends on cosmological parameters through the term
+$\frac{\partial\mu}{\partial z}\delta z$ added in quadrature to the
+light curve fit errors. For the cases where
+supernova  redshifts are determined spectroscopically leading to
+small $\delta z$, the covariance matrix $Cov$ becomes independent of the
+cosmological parameters and hence the second term is zero.  For cases,
+where the supernova redshift is determined photometrically, this turns out
+to be a very small contribution. All partial derivatives are evaluated at a 
+set of fiducial parameters $\Theta_p$ taken to be the DETF parameters 
+$\{\Omega_{DE},w_0,w_a,\Omega_k\}=\{0.73,-1,0,0\}$ for the 
+cosmological parameters, and our best estimates for the 
+nuisance parameters. We note that this is exactly the idea behind the 
+treatment suggested in the DETF report. We now proceed to discuss our 
+choice for the set of nuisance parameters as described below.
+
+
+\subsection{Nuisance Parameters}
+The main differences in our method, compared to that presented in the DETF report, are
+as follows:
+\begin{enumerate}
+\item We have an improved estimate of the effect of photo-z uncertainties, coming from 
+the full simulation of the DES survey. 
+\item The uncertainty in absolute magnitudes referred to in the DETF report 
+is analytically marginalized in our likelihood function. Therefore, our 
+``statistics only" Fisher matrix accounts for this in the correlated covariance matrix.
+\item In our SN analysis, we include two low-redshift samples as anchors: the 3-year 
+\verb=SDSS= sample with $\sim$350 SNe and a sample of 300 supernovae taken to be at redshift 
+of 0.055 \citep{li11}, each with a Gaussian error of 0.13 magnitudes . 
+Neither of these samples were included in the calculation of 
+the Stage II prior Fisher matrix. In each of these low-redshift 
+samples, the dominant systematic uncertainty is expected to be a step $\mu$ offset 
+of the kind described in the DETF report. Therefore, we include a step offset for each 
+of the low-redshift samples. We also assume a Gaussian prior on each of these step offsets of width 
+$\delta M_{lowz}= \delta M_{SDSS} =0.01$. This is consistent with the suggestion of the 
+DETF report.
+\item In the DETF report, all other systematic effects were treated as an effective linear 
+and quadratic shift in $\mu(z)$. The relevant nuisance parameters were taken to be the first 
+and second order redshift coefficients. We have used a more realistic estimate of the
+effects of systematics on $\mu(z)$. In our simulations, we vary the
+systematic parameters $\theta_n$, which model the instrumental setup and
+supernova properties, from their assumed values and study
+how the $\mu^{obs}(z)$ changes. Assuming that we are in the linear regime,
+we write
+\begin{equation}
+\mu^{obs}(z,\Theta) = \mu^{obs}(z,\Theta_p) +
+\sum_{j}\frac{\partial \mu^{obs}(z,\Theta)}{\partial \theta_n^j}
+\bigg\vert_{\Theta_p}\Delta\theta_n^j
+\end{equation}
+where the sum runs over $j$ which indexes the list of systematic parameters $\theta_n$.
+\end{enumerate}
+
+By varying each systematic parameter under consideration, one at a time,
+in our simulations, we estimate the average values of
+the partial derivatives $\frac{\partial \mu^{obs}(z,\Theta)}{\partial \theta_n^j}$ in 
+redshift bins of $0.1$ in terms of fitting functions that
+involves $3$ to $6$ parameters.  Using these,
+ we evaluate the Fisher matrix in the parameter space $\Theta$ which
+includes both the cosmological parameters $\theta_c$ and the systematic
+parameters $\theta_n$. The parameters $\theta_n$ will be set or measured to a fiducial
+value with an estimated uncertainty either in the process of calibration
+(parameters related to survey conditions) or by other experiments
+(SNIa light curve model parameters or SNcc fractions). These measurements
+ allow us to use appropriate priors on the deviation of these parameters
+from their fiducial values. Therefore we will marginalize over all
+the systematic  parameters with such priors on each of them. We now proceed
+to discuss the relevant set of systematic parameters.
+
+We first identify the relevant set of systematic effects and parametrize them.
+These are the zero-points in each filter band, the
+wavelength of the centroid of the filters,
+the fraction of SNe which are SNcc but misidentified as SNIa,
+and the values of \tauav\ and \rv. First, we describe these
+parameters, and the priors on them due to independent measurements.
+
+\noindent\textit{\textbf{Zero-Points:}} We 
+include the deviation in zero-points in each band $\{g_0,r_0,i_0,z_0\}$ from the fiducial values as parameters. 
+Further, we expect to be able to calibrate these independently to an error 
+of $0.01$ magnitudes. Hence we assume a Gaussian prior on each of these 
+parameters with a width $\sigma_{zpt}^g = \sigma_{zpt}^r = \sigma_{zpt}^i = \sigma_{zpt}^z =0.01$.\vspace{1mm}
+
+\noindent\textit{\textbf{Wavelength of Filter Centroid:}} We include the deviation of the 
+wavelength $\{\lambda_g,\lambda_r,\lambda_i,\lambda_z\}$ of the centroid of each filter from the fiducial values. 
+Further, we expect to be able to calibrate these independently to an error 
+of $10$ angstroms. Hence we assume a Gaussian prior on each of these 
+parameters with a width $\sigma_{\lambda}^g = \sigma_{\lambda}^r = \sigma_{\lambda}^i = \sigma_{\lambda}^z =10$ \AA.\vspace{1mm}
+
+\noindent\textit{\textbf{Core-Collapse Fraction:}} The sample 
+purity for the hybrid 10-field survey is 98\%. We are taking the uncertainty in this value to be 2\%, and 
+have shown that the effect on the FoM is still smaller than
+the other uncertainties.
+To be specific, we use $f_{cc}=0$ as a fiducial value and 
+$\sigma_{f_{cc}}=0.02$ as the Gaussian uncertainty in $f_{cc}$.\vspace{1mm}
+
+\noindent\textit{\textbf{CCM Dust Model Parameters:}} $\mu_{fit}$ 
+depends on the true values of the 
+parameters \tauav\ and \rv\ values. Our simulations are based on SDSS
+results \citep{kes09}  and, hence, we assume fiducial values 
+of \tauav=0.334 and \rv=2.18. 
+Assuming that these variables are correlated in the way determined by 
+the SDSS SN survey \citep{kes09}, we expect to have independent measurements 
+determining these parameters as a correlated Gaussian with a covariance 
+matrix $C$ with $C_{R_{\rm V}R_{\rm V}} = 0.1444, C_{\tau_{A_{\rm V}},\tau_{A_{\rm V}}} =0.003136,
+C_{\tau_{A_{\rm V}}R_{\rm V}}= 0.0036176$.\\
+ 
+As described in $\S$\ref{sec:sim}, these parameters are inputs to our simulations. Therefore, we can 
+study changes in the fitted values of $\mu$ by changing these input parameters in \snana. 
+For each of the parameters 
+that we shall describe, we compute $\frac{\partial{\mu_{eff}(z,\Theta)}}{\partial \Theta_i}\vert_{\Theta_p}$ 
+by numerically evaluating the partial 
+derivative of $\mu_{eff}(z,\Theta)$ as a function of redshift. 
+For doing so, $\mu_{eff}(z,\Theta)$ is estimated as the sample mean of 
+obtained values of the fitted distance modulus $\mu_{fit}$ in redshift bins 
+ of $0.1$. Having obtained these estimated values, along their dispersions, 
+we fit these values at discrete redshifts bin centroids to simple functions of the redshift. This allows us to 
+evaluate the partial derivative at any redshift in the range of 
+observation $(0,1.2)$. 
+
+\bibliographystyle{apj}                       %% AASTeX
+\bibliography{refs-des}
+
+\end{document}
